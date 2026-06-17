@@ -1,0 +1,385 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Destiny Discovered — the deep dive</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<style>
+  :root{--ink:#eaf1f7;--muted:#9fb1c1;--soft:#6f8295;--gold:#e8b54d;--cyan:#74a6ff;--teal:#36c2b4;--violet:#c9a0ff;--rose:#f59ab0;--line:#20303f;--panel:#0f1620;--panel2:#0b1219}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{color:var(--ink);font-family:"Segoe UI",system-ui,sans-serif;background:radial-gradient(1200px 800px at 50% 12%,#0e1726,#070b10 60%,#04060a);line-height:1.6}
+  #stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .wrap{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:0 18px 90px}
+  a{color:var(--gold)}
+  /* racetrack */
+  .track{position:sticky;top:0;z-index:6;background:linear-gradient(180deg,#070b10,#070b10ee 70%,transparent);padding:12px 18px 14px;margin:0 -18px 8px;backdrop-filter:blur(6px)}
+  .track .meta{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);align-items:center}
+  .track .meta b{color:var(--ink)} .track .pct{color:var(--gold);font-weight:800}
+  .track .line{position:relative;height:4px;border-radius:3px;background:#16222e;margin:22px 8px 8px}
+  .track .fill{position:absolute;left:0;top:0;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--cyan),var(--teal),var(--violet),var(--rose));transition:width .4s ease}
+  .pdot{position:absolute;top:50%;transform:translate(-50%,-50%);width:15px;height:15px;border-radius:50%;background:#16222e;border:2px solid #2a3c4e;cursor:pointer;transition:.18s}
+  .pdot:hover{transform:translate(-50%,-50%) scale(1.3)} .pdot.done{background:currentColor;border-color:currentColor}
+  .pdot.cur{transform:translate(-50%,-50%) scale(1.4);box-shadow:0 0 0 3px #070b10,0 0 12px 3px currentColor}
+  .jumpbtn{background:transparent;border:1px solid var(--line);border-radius:16px;color:var(--muted);font-size:11px;padding:4px 10px;cursor:pointer}
+  .jumpbtn:hover{border-color:var(--gold);color:var(--gold)}
+  .jumpgrid{display:none;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:7px;margin:12px 2px 0}
+  .jumpgrid.open{display:grid}
+  .jchip{aspect-ratio:1;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;display:grid;place-items:center;position:relative;transition:.15s}
+  .jchip:hover{transform:translateY(-2px)} .jchip.cur{outline:2px solid var(--gold)}
+  .jchip.done::after{content:'✓';position:absolute;top:-5px;right:-3px;font-size:10px;color:var(--teal)}
+  /* step */
+  .sec{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;margin:18px 0 2px}
+  h1.t{font-size:25px;margin:2px 0 4px;letter-spacing:-.01em;line-height:1.3}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+  .qnum{font-size:12px;color:var(--soft);font-weight:800;letter-spacing:.1em}
+  .help{font-size:13px;color:var(--muted);margin:-2px 0 12px;font-style:italic}
+  .intro{font-size:14.5px;color:#d7e2ec}.intro p{margin:0 0 11px}.intro strong{color:var(--gold)}
+  textarea,input[type=text],input[type=number]{width:100%;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:11px;padding:11px 13px;font:inherit;font-size:14.5px}
+  textarea{resize:none;overflow:hidden;min-height:52px}
+  textarea:focus,input:focus{outline:none;border-color:var(--gold)}
+  .listrow{display:flex;gap:9px;align-items:center;margin:8px 0}
+  .listrow .ln{flex:0 0 22px;height:22px;border-radius:50%;background:#16222e;border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--muted)}
+  .listrow .rcol{flex:1;display:flex;flex-direction:column;gap:6px}
+  .opts{display:flex;flex-wrap:wrap;gap:9px;margin:6px 0 4px}
+  .opt{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:24px;padding:9px 15px;cursor:pointer;background:var(--panel2);font-size:14px;transition:.15s}
+  .opt:hover{border-color:var(--gold)} .opt:has(:checked){border-color:var(--gold);background:rgba(232,181,77,.13);color:#fff;font-weight:700}
+  .opt input{accent-color:var(--gold)}
+  .followup{margin-top:12px} .followup label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:600}
+  .belief .bsub{margin:12px 0} .belief .bsub label{display:block;font-weight:700;font-size:14px;margin-bottom:5px;color:#e9d9b3}
+  .percent{margin-top:8px} .prow{display:flex;align-items:center;gap:12px;margin:9px 0}
+  .prow label{flex:1;font-size:14px} .prow input{flex:0 0 92px;text-align:right}
+  .psum{margin-top:12px;font-weight:800;font-size:14px;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);text-align:center}
+  .psum.ok{border-color:var(--teal);color:var(--teal)} .psum.bad{border-color:var(--rose);color:var(--rose)}
+  .note{margin:16px 0;font-size:13px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px 14px}
+  .secimg{width:100%;border-radius:14px;border:1px solid var(--line);margin:8px 0 14px;box-shadow:0 14px 40px #0008}
+  .done-msg{margin:16px 0;padding:14px 16px;border-radius:12px;background:linear-gradient(135deg,rgba(232,181,77,.14),rgba(201,160,255,.10));border:1px solid var(--gold);color:#f3e6c6;font-size:15px;text-align:center}
+  .optin{margin:16px 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:13.5px;color:#cfe0d6}
+  .optin b{color:var(--teal)} .optin label{display:flex;gap:10px;align-items:flex-start;margin-top:10px;cursor:pointer;color:var(--ink)}
+  /* nav */
+  .nav{display:flex;justify-content:space-between;gap:12px;margin:26px 0 8px;flex-wrap:wrap}
+  .btn{background:#15202c;color:var(--ink);border:1px solid var(--line);border-radius:24px;padding:11px 22px;font-size:14px;font-weight:700;cursor:pointer}
+  .btn:hover{border-color:var(--gold);color:var(--gold)} .btn.gold{background:linear-gradient(135deg,#f7d68c,var(--gold) 60%,#a5762a);color:#1a1206;border:none}
+  .btn:disabled{opacity:.4;cursor:default}
+  .toolbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0 0}
+  .tlink{font-size:12px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:18px;padding:6px 12px;cursor:pointer;text-decoration:none}
+  .tlink:hover{border-color:var(--gold);color:var(--gold)}
+  .saved{font-size:11.5px;color:var(--teal);text-align:center;margin-top:8px;min-height:14px;transition:opacity .3s}
+  /* modal */
+  .modal{position:fixed;inset:0;z-index:30;background:#04060ae8;display:grid;place-items:center;padding:20px;backdrop-filter:blur(4px)}
+  .modal.hidden{display:none}
+  .card{max-width:520px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px 24px;box-shadow:0 24px 70px #000b}
+  .card h2{margin:0 0 4px;font-size:22px}.card h2 b{color:var(--gold)} .card .lock{font-size:30px;text-align:center;margin-bottom:6px}
+  .card p{color:var(--muted);font-size:13.5px;margin:8px 0}
+  .card .promise{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 14px;font-size:13px;color:#cfe0d6;margin:12px 0}
+  .card .promise b{color:var(--teal)}
+  .card input[type=password]{width:100%;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;margin:6px 0}
+  .card .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px} .err{color:var(--rose);font-size:12.5px;min-height:16px}
+  @media (max-width:560px){h1.t{font-size:21px}}
+  #printArea{display:none}
+  @media print{ #stars,.track,.nav,.toolbar,.saved,.modal,.optin{display:none!important} body{background:#fff;color:#000} .wrap{display:none}
+    #printArea{display:block;color:#000;max-width:720px;margin:0 auto;padding:10px} #printArea h1{font-size:22px}
+    .pq{margin:0 0 14px}.pq .pl{font-weight:700}.pq .pa{white-space:pre-wrap;border-bottom:1px solid #ccc;min-height:20px;padding:3px 0} }
+</style></head>
+<body>
+<canvas id="stars"></canvas>
+
+<div class="modal" id="welcome"><div class="card">
+  <div class="lock">🔒</div>
+  <h2><b>Destiny</b> Discovered</h2>
+  <p>The deep excavation — 30 questions you live with over time. The first time Tim answered these, it took months. There is no clock and no wrong answer. Move freely, answer in any order, leave and come back as life reveals more.</p>
+  <div class="promise"><b>Your privacy, by design.</b> Everything you write here is saved <b>only on this device</b> — in this browser, on this computer. It is <b>never sent to us or anyone</b>. We literally cannot see it. It simply never leaves your machine — unless one day <em>you</em> choose to share it.</div>
+  <p>Optionally, lock your answers with a <b>passphrase</b> — they'll be encrypted on this device so only you can open them. (Leave blank to just keep them private here.)</p>
+  <input type="password" id="pp1" placeholder="Set a passphrase (optional)" autocomplete="new-password">
+  <input type="password" id="pp2" placeholder="Confirm passphrase" autocomplete="new-password">
+  <div class="err" id="ppErr"></div>
+  <div class="row"><button class="btn gold" id="beginBtn">Begin →</button><button class="tlink" id="printBlank">🖨 Print a blank form instead</button></div>
+</div></div>
+
+<div class="modal hidden" id="unlock"><div class="card">
+  <div class="lock">🔑</div><h2>Welcome back</h2>
+  <p>Your Destiny Discovered answers on this device are locked. Enter your passphrase to continue.</p>
+  <input type="password" id="ppUnlock" placeholder="Your passphrase" autocomplete="current-password">
+  <div class="err" id="unlockErr"></div>
+  <div class="row"><button class="btn gold" id="unlockBtn">Unlock →</button></div>
+</div></div>
+
+<div class="wrap" id="app" hidden>
+  <div class="track">
+    <div class="meta"><span class="sl" id="secLabel"></span><span><span id="posLabel"></span> · <span class="pct" id="pct">0%</span> <button class="jumpbtn" id="jumpToggle">⊞ All</button></span></div>
+    <div class="line"><div class="fill" id="fill"></div><div id="pdots"></div></div>
+    <div class="jumpgrid" id="jumpgrid"></div>
+  </div>
+  <div id="step"></div>
+  <div class="nav"><button class="btn" id="prev">← Back</button><button class="btn gold" id="next">Next →</button></div>
+  <div class="saved" id="saved"></div>
+  <div class="toolbar">
+    <button class="tlink" id="printBtn">🖨 Print / save my answers</button>
+    <button class="tlink" id="dlBtn">⤓ Download my answers</button>
+    <button class="tlink" id="lockBtn">🔒 Privacy &amp; passphrase</button>
+    <a class="tlink" href="find-your-north-star.html">← Both paths</a>
+  </div>
+</div>
+<div id="printArea"></div>
+
+<script src="assets/destiny-questions.js"></script>
+<script>
+(function(){
+  'use strict';
+  var Q = window.DD_QUESTIONS || [], PH = window.DD_PHASES || {};
+  var TOTAL = Q.length + 2;                 // welcome(0) + 30 questions + celebration(last)
+  var LAST = TOTAL - 1;
+  var K_ANS='dd-answers', K_STEP='dd-step', K_ENC='dd-enc', K_SALT='dd-salt';
+  var answers = {}, stepIndex = 0, cryptoKey = null;
+  var ORDER = ['foundation','purpose','action','beliefs','legacy'];
+
+  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function qAt(i){ return (i>=1 && i<=Q.length) ? Q[i-1] : null; }   // step i -> question
+
+  /* ---------- crypto ---------- */
+  function b64(b){ return btoa(String.fromCharCode.apply(null,new Uint8Array(b))); }
+  function unb64(s){ var b=atob(s),a=new Uint8Array(b.length); for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i); return a; }
+  async function deriveKey(pass, saltB64){
+    var salt = saltB64 ? unb64(saltB64) : crypto.getRandomValues(new Uint8Array(16));
+    var base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+    var key = await crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:150000,hash:'SHA-256'}, base, {name:'AES-GCM',length:256}, false, ['encrypt','decrypt']);
+    return { key:key, salt:b64(salt) };
+  }
+  async function encJSON(o){ var iv=crypto.getRandomValues(new Uint8Array(12)); var ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},cryptoKey,new TextEncoder().encode(JSON.stringify(o))); return b64(iv)+'.'+b64(ct); }
+  async function decJSON(s){ var p=s.split('.'); var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(p[0])},cryptoKey,unb64(p[1])); return JSON.parse(new TextDecoder().decode(pt)); }
+
+  /* ---------- persistence ---------- */
+  var saveTimer=null;
+  function scheduleSave(){
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(async function(){
+      try{
+        if(cryptoKey){ localStorage.setItem(K_ANS, await encJSON(answers)); localStorage.setItem(K_ENC,'1'); }
+        else { localStorage.setItem(K_ANS, JSON.stringify(answers)); localStorage.removeItem(K_ENC); }
+        localStorage.setItem(K_STEP, String(stepIndex)); flashSaved();
+      }catch(e){}
+    },350);
+  }
+  function flashSaved(){ var el=document.getElementById('saved'); el.textContent='✓ saved on this device'; el.style.opacity=1; clearTimeout(el._t); el._t=setTimeout(function(){el.style.opacity=0;},1400); }
+
+  /* ---------- answered? ---------- */
+  function answered(q){
+    return Object.keys(answers).some(function(k){
+      if(!(k===q.id || k.indexOf(q.id+'_')===0 || k.indexOf(q.id+'__')===0)) return false;
+      var v=answers[k]; return v!==undefined && v!==null && v!=='' && v!==false;
+    });
+  }
+
+  /* ---------- field renderers ---------- */
+  function fText(q){ return '<textarea data-key="'+q.id+'" rows="'+(q.rows||3)+'" placeholder="Type your answer…"></textarea>'; }
+  function fList(q){
+    var h='';
+    for(var i=0;i<q.count;i++){
+      h+='<div class="listrow"><span class="ln">'+(i+1)+'</span><div class="rcol">'+
+         '<input type="text" data-key="'+q.id+'_'+i+'" placeholder="'+(q.withReason?'Person '+(i+1):'…')+'">';
+      if(q.withReason) h+='<input type="text" data-key="'+q.id+'_'+i+'r" placeholder="…why this person?">';
+      h+='</div></div>';
+    }
+    return h;
+  }
+  function fRank(q){
+    return '<div class="percent">'+q.items.map(function(it){
+      return '<div class="prow"><label>'+esc(it)+'</label><input type="number" min="1" max="'+q.items.length+'" data-key="'+q.id+'_'+it+'" placeholder="#"></div>';
+    }).join('')+'</div>';
+  }
+  function fChoice(q){
+    var h='<div class="opts">'+q.options.map(function(o){
+      return '<label class="opt"><input type="radio" name="'+q.id+'" data-key="'+q.id+'" value="'+esc(o)+'"><span>'+esc(o)+'</span></label>';
+    }).join('')+'</div>';
+    if(q.followup) h+='<div class="followup"><label>'+esc(q.followup)+'</label><textarea data-key="'+q.id+'_why" rows="3" placeholder="…"></textarea></div>';
+    return h;
+  }
+  function fMulti(q){
+    var h='<div class="opts">'+q.options.map(function(o,i){
+      return '<label class="opt"><input type="checkbox" data-key="'+q.id+'__'+i+'" value="'+esc(o)+'"><span>'+esc(o)+'</span></label>';
+    }).join('')+'</div>';
+    if(q.allowOther) h+='<div class="followup"><label>Other factors?</label><input type="text" data-key="'+q.id+'_other" placeholder="…"></div>';
+    return h;
+  }
+  function fBelief(q){
+    return '<div class="belief">'+q.subs.map(function(s){
+      return '<div class="bsub"><label>'+esc(s.l)+'</label><textarea data-key="'+q.id+'_'+s.k+'" rows="2" placeholder="…"></textarea></div>';
+    }).join('')+'</div>';
+  }
+  function fPercent(q){
+    return '<div class="percent">'+q.subs.map(function(s){
+      return '<div class="prow"><label>'+esc(s.l)+'</label><input type="number" min="0" max="100" data-key="'+q.id+'_'+s.k+'" placeholder="0"><span>%</span></div>';
+    }).join('')+'<div class="psum" id="psum_'+q.id+'">Total: 0%</div></div>';
+  }
+  var RENDER={ text:fText, list:fList, rank:fRank, choice:fChoice, multi:fMulti, belief:fBelief, percent:fPercent };
+
+  /* ---------- render a step ---------- */
+  function render(){
+    renderTrack();
+    var h='', step=stepIndex;
+    if(step===0){
+      h+='<div class="sec" style="color:var(--gold)">The deep dive</div>'+
+         '<h1 class="t">Welcome to Destiny Discovered</h1>'+
+         '<div class="intro"><p>This is the long, honest dig — <strong>30 questions</strong> that reveal what makes the great, great: a <strong>sense of destiny</strong>. It is built from decades of studying the lives of remarkable people.</p>'+
+         '<p>You do not finish this in one sitting. Answer what you can, skip what you cannot, and <strong>return as life reveals more</strong>. Everything saves automatically on your own device.</p>'+
+         '<p>Use <strong>⊞ All</strong> at the top to jump to any question. When you are ready, begin.</p></div>';
+    } else if(step===LAST){
+      h+='<div class="sec" style="color:var(--rose)">Complete</div>'+
+         '<h1 class="t">Your destiny is taking shape</h1>'+
+         '<div class="done-msg">You have walked the whole questionnaire. Sit with your answers. Return to them. The patterns that repeat are your North Star showing itself.</div>'+
+         '<div class="optin"><b>What happens to all this?</b> It stays on this device — yours alone. When HB1000 member accounts open, you will be able, <em>entirely by your choice and with our gratitude</em>, to contribute your insights to a shared understanding that helps us serve people better. Until you choose that, nothing leaves your machine.'+
+         '<label><input type="checkbox" data-key="_contribute_intent"><span>When member accounts open, I would be open to (optionally) contributing my anonymous insights. <em style="color:var(--soft)">(Saves only your preference — shares nothing now.)</em></span></label></div>'+
+         '<div class="note">Tip: use <b>🖨 Print / save my answers</b> below to keep a copy, or to share it on your own terms.</div>';
+    } else {
+      var q=qAt(step), ph=PH[q.phase]||{};
+      h+='<div class="sec" style="color:'+(ph.color||'var(--gold)')+'">'+esc(ph.label||'')+'</div>'+
+         '<div class="qnum">QUESTION '+q.n+' OF '+Q.length+'</div>'+
+         '<h1 class="t">'+esc(q.label)+'</h1>';
+      if(q.help) h+='<div class="help">'+esc(q.help)+'</div>';
+      h+=(RENDER[q.type]||fText)(q);
+    }
+    document.getElementById('step').innerHTML=h;
+    hydrate();
+    document.getElementById('prev').disabled = step===0;
+    document.getElementById('next').textContent = step===LAST ? 'Done' : 'Next →';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  /* ---------- hydrate inputs (restore + wire) ---------- */
+  function hydrate(){
+    var els=document.querySelectorAll('[data-key]');
+    Array.prototype.forEach.call(els,function(el){
+      var k=el.dataset.key, t=el.type;
+      if(t==='radio'){ el.checked = answers[k]===el.value; el.addEventListener('change',function(){ if(el.checked){answers[k]=el.value; scheduleSave();} }); }
+      else if(t==='checkbox'){ el.checked = !!answers[k]; el.addEventListener('change',function(){ answers[k]=el.checked; scheduleSave(); }); }
+      else { el.value = answers[k]!=null?answers[k]:''; if(el.tagName==='TEXTAREA') autoresize(el);
+        el.addEventListener('input',function(){ answers[k]=el.value; if(el.tagName==='TEXTAREA')autoresize(el); if(el.type==='number')updateSum(); scheduleSave(); }); }
+    });
+    updateSum();
+  }
+  function autoresize(t){ t.style.height='auto'; t.style.height=Math.max(52,t.scrollHeight+2)+'px'; }
+  function updateSum(){
+    var q=qAt(stepIndex); if(!q||q.type!=='percent') return;
+    var box=document.getElementById('psum_'+q.id); if(!box) return;
+    var sum=q.subs.reduce(function(a,s){ var v=parseFloat(answers[q.id+'_'+s.k]); return a+(isNaN(v)?0:v); },0);
+    box.textContent='Total: '+sum+'%'; box.className='psum '+(sum===100?'ok':(sum>0?'bad':''));
+  }
+
+  /* ---------- racetrack + jump grid ---------- */
+  function renderTrack(){
+    var pct = Math.round((stepIndex/LAST)*100);
+    document.getElementById('pct').textContent=pct+'%';
+    document.getElementById('fill').style.width=pct+'%';
+    var sl=document.getElementById('secLabel'), pos=document.getElementById('posLabel');
+    if(stepIndex===0){ sl.textContent='Welcome'; sl.style.color='var(--gold)'; pos.textContent='Getting started'; }
+    else if(stepIndex===LAST){ sl.textContent='Complete'; sl.style.color='var(--rose)'; pos.textContent='Finished'; }
+    else { var q=qAt(stepIndex), ph=PH[q.phase]||{}; sl.textContent=ph.label||''; sl.style.color=ph.color||'var(--gold)'; pos.textContent='Q'+q.n+' of '+Q.length; }
+    // 5 phase dots positioned at each phase's first step
+    var dwrap=document.getElementById('pdots'); dwrap.innerHTML='';
+    ORDER.forEach(function(pk){
+      var firstStep=null; for(var i=0;i<Q.length;i++){ if(Q[i].phase===pk){ firstStep=i+1; break; } }
+      if(firstStep==null) return;
+      var ph=PH[pk]||{}, p=(firstStep/LAST)*100;
+      var done = stepIndex>=firstStep, cur = stepIndex>=firstStep && (stepIndex<=lastStepOfPhase(pk));
+      var d=document.createElement('span');
+      d.className='pdot'+(done?' done':'')+(cur?' cur':''); d.style.color=ph.color||'var(--gold)';
+      d.style.left=p+'%'; d.title=ph.label; d.addEventListener('click',function(){ go(firstStep); });
+      dwrap.appendChild(d);
+    });
+    renderJump();
+  }
+  function lastStepOfPhase(pk){ var last=1; for(var i=0;i<Q.length;i++){ if(Q[i].phase===pk) last=i+1; } return last; }
+  function renderJump(){
+    var g=document.getElementById('jumpgrid'); g.innerHTML='';
+    Q.forEach(function(q,i){
+      var ph=PH[q.phase]||{}, c=document.createElement('button');
+      c.className='jchip'+(answered(q)?' done':'')+((i+1)===stepIndex?' cur':'');
+      c.textContent=q.n; c.style.color=ph.color||'var(--muted)';
+      c.style.borderColor = (i+1)===stepIndex ? (ph.color||'var(--gold)') : 'var(--line)';
+      c.title='Q'+q.n+': '+q.label; c.addEventListener('click',function(){ go(i+1); g.classList.remove('open'); });
+      g.appendChild(c);
+    });
+  }
+  document.getElementById('jumpToggle').addEventListener('click',function(){ document.getElementById('jumpgrid').classList.toggle('open'); });
+
+  function go(i){ stepIndex=Math.max(0,Math.min(LAST,i)); render(); scheduleSave(); }
+  document.getElementById('next').addEventListener('click',function(){ if(stepIndex<LAST) go(stepIndex+1); });
+  document.getElementById('prev').addEventListener('click',function(){ if(stepIndex>0) go(stepIndex-1); });
+
+  /* ---------- print ---------- */
+  function answerToText(q){
+    if(q.type==='text') return answers[q.id]||'';
+    if(q.type==='belief') return q.subs.map(function(s){ return s.l+' '+(answers[q.id+'_'+s.k]||''); }).join('\n');
+    if(q.type==='percent') return q.subs.map(function(s){ return s.l+': '+(answers[q.id+'_'+s.k]||'0')+'%'; }).join('\n');
+    if(q.type==='rank') return q.items.map(function(it){ return (answers[q.id+'_'+it]||'?')+'. '+it; }).join('  ');
+    if(q.type==='list'){ var o=[]; for(var i=0;i<q.count;i++){ var v=answers[q.id+'_'+i]; if(v){ o.push((i+1)+'. '+v+(q.withReason&&answers[q.id+'_'+i+'r']?' — '+answers[q.id+'_'+i+'r']:'')); } } return o.join('\n'); }
+    if(q.type==='choice'){ var c=answers[q.id]||''; if(q.followup&&answers[q.id+'_why']) c+=' — '+answers[q.id+'_why']; return c; }
+    if(q.type==='multi'){ var picks=q.options.filter(function(o,i){ return answers[q.id+'__'+i]; }); if(answers[q.id+'_other']) picks.push(answers[q.id+'_other']); return picks.join(', '); }
+    return '';
+  }
+  function buildPrint(blank){
+    var h='<h1>Destiny Discovered — '+(blank?'Worksheet':'My Answers')+'</h1>';
+    Q.forEach(function(q){
+      h+='<div class="pq"><div class="pl">'+q.n+'. '+esc(q.label)+'</div><div class="pa">'+(blank?'&nbsp;<br>&nbsp;<br>&nbsp;':(esc(answerToText(q)).replace(/\n/g,'<br>')||'&nbsp;'))+'</div></div>';
+    });
+    document.getElementById('printArea').innerHTML=h;
+  }
+  document.getElementById('printBtn').addEventListener('click',function(){ buildPrint(false); window.print(); });
+  document.getElementById('printBlank').addEventListener('click',function(){ buildPrint(true); window.print(); });
+  function downloadText(text,fname){ var b=new Blob([text],{type:'text/plain;charset=utf-8'}); var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=fname; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },800); }
+  document.getElementById('dlBtn').addEventListener('click',function(){
+    var L=['DESTINY DISCOVERED — My Answers','================================',''];
+    Q.forEach(function(q){ L.push(q.n+'. '+q.label, (answerToText(q)||'(blank)'), ''); });
+    L.push('Saved from HB1000 · this copy is yours to keep or share on your own terms.');
+    downloadText(L.join('\n'),'my-destiny-discovered.txt');
+  });
+
+  /* ---------- passphrase panel ---------- */
+  document.getElementById('lockBtn').addEventListener('click',async function(){
+    var has=!!cryptoKey;
+    var msg=has?'Your answers are locked on this device.\n\nType a NEW passphrase to change it, or type REMOVE to unlock (still local-only).':'Set a passphrase to encrypt your answers on this device (only you can open them):';
+    var pp=window.prompt(msg,''); if(pp===null) return;
+    if(has && pp.trim().toUpperCase()==='REMOVE'){ cryptoKey=null; localStorage.removeItem(K_SALT); scheduleSave(); alert('Passphrase removed. Your answers stay private on this device.'); return; }
+    if(pp.trim().length<4){ alert('Passphrase too short (4+ characters).'); return; }
+    var dk=await deriveKey(pp,null); cryptoKey=dk.key; localStorage.setItem(K_SALT,dk.salt); scheduleSave();
+    alert('Locked. Keep your passphrase safe — it is the only key, and we have no copy.');
+  });
+
+  /* ---------- begin / unlock ---------- */
+  function start(){
+    document.getElementById('welcome').classList.add('hidden');
+    document.getElementById('unlock').classList.add('hidden');
+    document.getElementById('app').hidden=false;
+    var s=parseInt(localStorage.getItem(K_STEP)||'0',10); stepIndex=isNaN(s)?0:Math.max(0,Math.min(LAST,s));
+    render(); starfield();
+  }
+  document.getElementById('beginBtn').addEventListener('click',async function(){
+    var p1=document.getElementById('pp1').value,p2=document.getElementById('pp2').value,err=document.getElementById('ppErr');
+    if(p1){ if(p1.length<4){err.textContent='Passphrase too short (4+).';return;} if(p1!==p2){err.textContent='Passphrases don’t match.';return;}
+      var dk=await deriveKey(p1,null); cryptoKey=dk.key; localStorage.setItem(K_SALT,dk.salt); }
+    start(); scheduleSave();
+  });
+  document.getElementById('unlockBtn').addEventListener('click',async function(){
+    var err=document.getElementById('unlockErr');
+    try{ var dk=await deriveKey(document.getElementById('ppUnlock').value, localStorage.getItem(K_SALT)); cryptoKey=dk.key; answers=await decJSON(localStorage.getItem(K_ANS)); start(); }
+    catch(e){ err.textContent='Wrong passphrase — try again.'; }
+  });
+
+  /* ---------- boot ---------- */
+  (function(){
+    var enc=localStorage.getItem(K_ENC)==='1', raw=localStorage.getItem(K_ANS);
+    if(enc && raw){ document.getElementById('unlock').classList.remove('hidden'); document.getElementById('welcome').classList.add('hidden'); document.getElementById('ppUnlock').focus(); return; }
+    if(raw){ try{ answers=JSON.parse(raw); }catch(e){ answers={}; } }
+    if(raw && Object.keys(answers).length){ start(); }
+  })();
+
+  /* ---------- starfield ---------- */
+  function starfield(){
+    var c=document.getElementById('stars'); if(!c||c._on) return; c._on=true;
+    var ctx=c.getContext('2d'),stars=[],reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function size(){ c.width=innerWidth;c.height=innerHeight; var n=Math.min(160,Math.round(innerWidth*innerHeight/12000)); stars=[]; for(var i=0;i<n;i++)stars.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.3+.2,a:Math.random()}); }
+    size(); addEventListener('resize',size);
+    (function loop(){ ctx.clearRect(0,0,c.width,c.height); for(var i=0;i<stars.length;i++){var s=stars[i]; if(!reduce)s.a+=(Math.random()-.5)*.05; s.a=Math.max(.15,Math.min(1,s.a)); ctx.globalAlpha=s.a; ctx.fillStyle='#cfe0f5'; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,7); ctx.fill();} ctx.globalAlpha=1; if(!reduce)requestAnimationFrame(loop); })();
+  }
+})();
+</script>
+</body></html>

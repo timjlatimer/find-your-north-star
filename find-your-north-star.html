@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Find Your North Star — HB1000</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<style>
+  :root{--ink:#eaf1f7;--muted:#9fb1c1;--soft:#6f8295;--gold:#e8b54d;--teal:#36c2b4;--cyan:#74a6ff;--line:#20303f;--panel:#0f1620}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;color:var(--ink);font-family:"Segoe UI",system-ui,sans-serif;
+    background:radial-gradient(1100px 760px at 50% 18%,#0e1726,#070b10 60%,#04060a)}
+  a{color:inherit}
+  .wrap{max-width:760px;margin:0 auto;padding:34px 18px 60px}
+  .hero{display:block;width:100%;max-width:680px;margin:2px auto 14px;border-radius:16px;box-shadow:0 16px 50px #000a,0 0 0 1px var(--line)}
+  h1{text-align:center;font-size:30px;margin:6px 0 4px;letter-spacing:-.01em}
+  h1 b{color:var(--gold)}
+  .lede{text-align:center;color:var(--muted);max-width:600px;margin:0 auto;font-size:15px;line-height:1.6}
+  .lede em{color:var(--ink);font-style:normal}
+  .paths{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:30px 0 10px}
+  @media (max-width:640px){.paths{grid-template-columns:1fr}}
+  .path{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:22px 20px;transition:.18s;text-decoration:none;position:relative;overflow:hidden}
+  .path:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 16px 44px #0008}
+  .path .tag{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--gold)}
+  .path.deep .tag{color:var(--cyan)}
+  .path h2{font-size:21px;margin:8px 0 2px}
+  .path .time{font-size:12.5px;color:var(--soft);font-weight:700;margin-bottom:10px}
+  .path p{color:var(--muted);font-size:13.5px;line-height:1.55;flex:1;margin:0 0 16px}
+  .path .go{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;font-weight:800;font-size:14px;
+    color:#1a1206;background:linear-gradient(135deg,#f7d68c,var(--gold) 60%,#a5762a);border-radius:999px;padding:10px 18px}
+  .path.deep .go{color:#06121a;background:linear-gradient(135deg,#bfe3ff,var(--cyan) 60%,#3f7fd0)}
+  .note{font-size:11.5px;color:var(--soft);margin-top:9px}
+  .song{display:flex;align-items:center;gap:14px;max-width:520px;margin:20px auto 2px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+  .songbtn{flex:0 0 auto;width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;font-size:17px;color:#1a1206;background:linear-gradient(135deg,#f7d68c,var(--gold) 60%,#a5762a);display:grid;place-items:center}
+  .songbtn:hover{filter:brightness(1.08)}
+  .songmeta .songt{font-weight:800;font-size:13.5px}
+  .songmeta .songd{color:var(--muted);font-size:12px;margin-top:2px;line-height:1.45}
+  .both{text-align:center;color:var(--muted);font-size:13px;margin:18px auto 0;max-width:580px;line-height:1.6}
+  .both b{color:var(--ink)}
+  .foot{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);text-align:center;color:var(--soft);font-size:12.5px;line-height:1.7}
+  .foot a{color:var(--muted);border-bottom:1px dotted var(--soft);text-decoration:none}
+  .foot a:hover{color:var(--gold);border-color:var(--gold)}
+  .star{color:var(--gold)}
+</style></head>
+<body>
+<div class="wrap">
+  <img class="hero" src="assets/img/two-paths-one-star.webp" alt="Two glowing paths rising to a single gold star — a fast golden arc on the left, a long winding stepped climb on the right — both reaching the same summit">
+  <h1>Find Your <b>North Star</b></h1>
+  <p class="lede">Your <em>Massive Transformational Purpose</em> — the one statement that defines your life, powers your decisions, and <em>places a ding in the universe</em>. There are two ways up the mountain. Both lead to the same summit. Pick the one that fits where you are.</p>
+
+  <div class="song">
+    <audio id="nsSong" preload="none" src="assets/what-grows-here.mp3"></audio>
+    <button class="songbtn" id="songBtn" aria-label="Play the North Star theme song">▶</button>
+    <div class="songmeta">
+      <div class="songt">♪ "What Grows Here" — the North Star theme</div>
+      <div class="songd">A man plants a maple he'll never sit under. Press play while you find yours.</div>
+    </div>
+  </div>
+
+  <div class="paths">
+    <a class="path quick" href="north-star-workshop.html">
+      <span class="tag">Start here · the on-ramp</span>
+      <h2>The Workshop</h2>
+      <div class="time">★ 45–90 minutes · 12 guided steps · 3 frameworks</div>
+      <p>A guided journey to a first, real draft of your North Star — with Tim's own example answers walking you through every step. The fastest way to a statement you can actually use.</p>
+      <span class="go">Begin the Workshop →</span>
+      <span class="note" style="color:var(--teal)">✓ Built right here — your answers stay private on your device.</span>
+    </a>
+
+    <a class="path deep" href="destiny-discovered.html">
+      <span class="tag">Go deep · the full excavation</span>
+      <h2>Destiny Discovered</h2>
+      <div class="time">◆ a deep exercise · 30 questions · weeks to months</div>
+      <p>The long, honest dig — 30 questions you live with over time, returning as life reveals more. This is how you go all the way to the bottom of your "why."</p>
+      <span class="go">Open Destiny Discovered →</span>
+      <span class="note" style="color:var(--teal)">✓ Built right here — your answers stay private on your device.</span>
+    </a>
+  </div>
+
+  <p class="both">Two separate, equally valid paths to the <b>same end</b>: your Prime North Star. Start with the Workshop, go deeper with Destiny Discovered whenever you're ready — or do both.</p>
+
+  <div class="foot">
+    <span class="star">★</span> Your <b style="color:var(--ink)">North Star</b> — the one statement that everything else aims at.
+    It stands on its own. Find it, write it down, and let it steer every decision you make.
+  </div>
+</div>
+<script>
+(function(){
+  var a=document.getElementById('nsSong'), b=document.getElementById('songBtn');
+  if(!a||!b) return;
+  b.addEventListener('click',function(){
+    if(a.paused){ a.play().then(function(){ b.textContent='⏸'; }).catch(function(){}); }
+    else { a.pause(); b.textContent='▶'; }
+  });
+  a.addEventListener('ended',function(){ b.textContent='▶'; });
+})();
+</script>
+</body></html>
