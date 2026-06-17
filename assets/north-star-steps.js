@@ -8,7 +8,7 @@ window.NS_STEPS = [
     sectionLabel: 'Begin Here',
     title: 'Find Your North Star',
     subtitle: 'A guided journey to your Massive Transformational Purpose',
-    intro: `Every person who has ever made a meaningful dent in the universe started with a single question: *Why am I here?*\n\nThis is not a quick exercise. It is a guided journey — one that may take you an hour, or a week, or return to you over years. There are no wrong answers. There is only your truth, waiting to be discovered.\n\nYou are about to build the most important statement of your life: your **Prime North Star** — the purpose that will guide every decision, every project, every relationship.\n\nTim Latimer has been refining his for years. He'll walk beside you through every step.`,
+    intro: `Every person who has ever made a meaningful ding in the universe started with a single question: *Why am I here?*\n\nThis is not a quick exercise. It is a guided journey — one that may take you an hour, or a week, or return to you over years. There are no wrong answers. There is only your truth, waiting to be discovered.\n\nYou are about to build the most important statement of your life: your **Prime North Star** — the purpose that will guide every decision, every project, every relationship.\n\nTim Latimer has been refining his for years. He'll walk beside you through every step.`,
     quote: {
       text: "The two most important days in your life are the day you are born and the day you find out why.",
       attribution: "Mark Twain"
@@ -270,7 +270,7 @@ window.NS_STEPS = [
     sectionLabel: 'Destiny Discovered',
     title: 'Your Legacy Vision',
     subtitle: 'What will remain when you are gone?',
-    intro: `Legacy is not about monuments or monuments. It's about the ripples that continue after you've left the room — the ideas you planted, the people you believed in, the systems you built that kept serving long after you moved on.\n\nWhat do you want to leave behind? Not in terms of things — but in terms of *change*. What would be different about the world because you were in it?`,
+    intro: `Legacy is not about monuments or statues. It's about the ripples that continue after you've left the room — the ideas you planted, the people you believed in, the systems you built that kept serving long after you moved on.\n\nWhat do you want to leave behind? Not in terms of things — but in terms of *change*. What would be different about the world because you were in it?`,
     quote: {
       text: "Carve your name on hearts, not tombstones. A legacy is etched into the minds of others and the stories they share about you.",
       attribution: "Shannon L. Alder"
