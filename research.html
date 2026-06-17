@@ -35,6 +35,19 @@
   .giant .who{font-weight:800;color:#fff;font-size:15px}
   .giant .work{font-size:12px;color:var(--gold);font-style:italic;margin:1px 0 7px}
   .giant p{font-size:13.5px;color:var(--muted);margin:0}
+  .paper{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:10px 0;overflow:hidden}
+  .paper>summary{list-style:none;cursor:pointer;padding:14px 17px;display:flex;align-items:center;gap:12px}
+  .paper>summary::-webkit-details-marker{display:none}
+  .paper>summary::after{content:'▸';margin-left:auto;color:var(--gold);font-size:15px;transition:transform .2s;flex:0 0 auto}
+  .paper[open]>summary::after{transform:rotate(90deg)}
+  .paper>summary:hover{background:rgba(232,181,77,.05)}
+  .paper .sk{font-size:22px;flex:0 0 auto}
+  .paper .who{font-weight:800;color:#fff;font-size:15.5px}
+  .paper .work,.paper .tag{font-size:12.5px;color:var(--gold);font-style:italic}
+  .paper .body{padding:4px 17px 16px;border-top:1px solid var(--line)}
+  .paper .body p{font-size:14px;color:#d7e2ec;line-height:1.7;margin:11px 0 0}
+  .paper .body .how{margin-top:12px;padding:11px 14px;border-left:3px solid var(--gold);background:rgba(232,181,77,.06);border-radius:0 8px 8px 0;color:#e9dcc0;font-size:13.5px;line-height:1.65}
+  .hint{text-align:center;color:var(--soft);font-size:12px;margin:2px 0 8px}
   .fig{width:100%;border-radius:14px;border:1px solid var(--line);margin:6px 0 4px;box-shadow:0 14px 40px #0008}
   .figcap{font-size:12px;color:var(--soft);text-align:center;margin:2px 0 0}
   .anat{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
@@ -78,25 +91,83 @@
     <p class="big">What makes the great <em>great</em> isn't talent, wealth, or luck. It's a <em>sense of destiny</em> — a clear, felt purpose that organizes a whole life.</p>
     <p>That single idea is the root of the <b>Destiny Discovered</b> tradition this work draws from — a body of study built on the biographies of remarkable people, asking what they had in common. The answer wasn't circumstance. It was a <b>Prime North Star</b> they could name, and lived toward on purpose.</p>
     <blockquote>A life needs three things: a sense of <b>purpose</b>, the opportunity to <b>contribute</b>, and a <b>legacy</b> worth leaving.</blockquote>
-    <div class="three">
-      <div class="pill3"><div class="k">🎯</div><div class="t">Purpose</div><div class="d">A reason that gets you up — bigger than yourself.</div></div>
-      <div class="pill3"><div class="k">🤝</div><div class="t">Contribution</div><div class="d">A way to give that the world actually feels.</div></div>
-      <div class="pill3"><div class="k">🌱</div><div class="t">Legacy</div><div class="d">Something that outlasts you — a ding in the universe.</div></div>
-    </div>
+    <div class="hint">▸ click each one to read more</div>
+    <details class="paper"><summary><span class="sk">🎯</span><span class="who">Purpose</span> <span class="tag">— your reason to get up</span></summary>
+      <div class="body">
+        <p>Purpose is the reason bigger than yourself — the "why" that pulls you out of bed before anyone asks you to. It isn't a job title or a finish line. It's the sense that your days point somewhere, that your effort matters to something beyond your own comfort.</p>
+        <p>The idea runs deep. The psychiatrist Viktor Frankl, who survived the Nazi concentration camps, argued in <i>Man's Search for Meaning</i> that the people most able to endure unbearable hardship were often those who held on to a reason to live — a person to return to, a work left unfinished. The Japanese have a word for this everyday sense of direction: <i>ikigai</i>, loosely "a reason for being." Researchers who study meaning tend to find it alongside greater resilience and well-being, and some long-term studies link a strong sense of purpose with healthier, longer lives. The science is still maturing — but the direction of the evidence is encouraging, and the human testimony is very old.</p>
+        <div class="how"><b>In your North Star:</b> the Workshop helps you put words to your own "why" — naming the reason that's been quietly driving you, so you can aim at it on purpose instead of by accident.</div>
+      </div>
+    </details>
+    <details class="paper"><summary><span class="sk">🤝</span><span class="who">Contribution</span> <span class="tag">— giving the world can feel</span></summary>
+      <div class="body">
+        <p>Achievement is about what you gather for yourself. Contribution is about what you give that someone else actually feels — the help, the work, the kindness that lands in another person's life and changes their day.</p>
+        <p>It's easy to assume fulfillment comes from winning: the promotion, the prize, the next milestone. Those moments feel good, but they fade fast, and the goalposts move. What seems to last is the quieter satisfaction of being useful to others — of knowing your existence made someone's load lighter. You don't need a grand platform for this. Contribution scales down to the daily: a problem you solved, a skill you taught, a moment you showed up when it counted. The point isn't applause — it's that the giving is real, and felt.</p>
+        <div class="how"><b>In your North Star:</b> Destiny Discovered helps you spot the specific way you're built to give — so your contribution flows from who you already are, not from guilt or obligation.</div>
+      </div>
+    </details>
+    <details class="paper"><summary><span class="sk">🌱</span><span class="who">Legacy</span> <span class="tag">— a ding in the universe</span></summary>
+      <div class="body">
+        <p>Legacy is what outlasts you — the mark you leave that keeps working after you've gone. Steve Jobs called it putting a "dent in the universe" (Tim's own warmer version: a <b>"Ding in the Universe"</b>). It doesn't have to be famous or carved in stone. It can be people you raised, values you passed on, or work that quietly keeps serving long after your name is forgotten.</p>
+        <p>There's a simple, clarifying practice behind it: live with the end in mind. When you picture, honestly, what you'd want said of you one day — what you'd want to have built, mended, or set in motion — the noise of the moment gets quieter and your real priorities step forward. You're not trying to be remembered for its own sake; you're trying to build something worth continuing.</p>
+        <div class="how"><b>In your North Star:</b> the Workshop invites you to look back from the end of your life and name what you most want to leave behind — turning a far-off horizon into the compass for your next decision.</div>
+      </div>
+    </details>
   </div>
 
   <!-- GIANTS -->
   <div class="sec">
     <h2>Standing on giants' shoulders</h2>
     <p class="muted">This method doesn't invent the wheel. It braids together the best thinking on purpose into one practical path — "a <b style="color:var(--gold)">Lean Canvas for your life</b>."</p>
-    <div class="giants">
-      <div class="giant"><div class="who">Stephen R. Covey</div><div class="work">The 7 Habits of Highly Effective People</div><p>"Begin with the end in mind." The roles you play — and the funeral exercise (what would you want said of you?) — anchor the Workshop.</p></div>
-      <div class="giant"><div class="who">The "Destiny Discovered" program</div><div class="work">the sense-of-destiny instrument</div><p>The 30 deep questions that excavate purpose, belief, and legacy — the kind you live with over weeks, not minutes.</p></div>
-      <div class="giant"><div class="who">Jim Collins</div><div class="work">Good to Great</div><p>The <b>BHAG</b> — a Big Hairy Audacious Goal. It gives a North Star its horizon: 3–5 years out, concrete, with real numbers in the sentence.</p></div>
-      <div class="giant"><div class="who">Clayton Christensen</div><div class="work">Competing Against Luck</div><p>The <b>Job to Be Done</b>: people "hire" what truly serves them. A North Star names who you serve and the job you do for them.</p></div>
-      <div class="giant"><div class="who">Steve Jobs</div><div class="work">the aspirational pull</div><p>The call to "put a <b>ding in the universe</b>." It sits at the very top — the reason all the rest is worth doing.</p></div>
-      <div class="giant"><div class="who">Tim Latimer</div><div class="work">Business as a Force for Good</div><p>The "Before I Die" statement, and the idea that ties it together: one page that makes every later decision easier to make.</p></div>
-    </div>
+    <div class="hint">▸ click any name to read the full summary</div>
+    <details class="paper"><summary><span class="who">Stephen R. Covey</span> <span class="work">— begin with the end in mind</span></summary>
+      <div class="body">
+        <p>Stephen Covey's <i>The 7 Habits of Highly Effective People</i> (1989) is one of the best-selling personal-development books ever written. Its most quietly powerful idea is Habit 2: "Begin with the end in mind." Before you act, get clear on where you actually want to end up.</p>
+        <p>Covey makes this vivid with a famous exercise. Picture your own funeral years from now, and the people who matter most each standing up to speak about you. What would you want them to honestly say about the kind of person you were and the life you led? Whatever rises up, Covey argues, <i>that</i> is your real definition of success — and most of us have never stopped to name it.</p>
+        <p>From there he suggests writing a personal mission statement: a short, plain description of who you want to be and what you stand for. He pairs it with thinking in terms of your "roles" — parent, partner, friend, builder, neighbour — so your purpose isn't a slogan but something lived out in the real relationships of your week, anchored to deep values rather than whatever is loudest today.</p>
+        <div class="how"><b>How it shapes your North Star:</b> Covey gives you the best starting move — define the destination before the journey. The eulogy exercise cuts past money, status and busywork to what you'd genuinely want your life to have meant. Those answers are the raw material for your North Star; your daily roles turn it from a nice idea into something you practice.</div>
+      </div>
+    </details>
+    <details class="paper"><summary><span class="who">The "Destiny Discovered" program</span> <span class="work">— a sense-of-destiny tradition</span></summary>
+      <div class="body">
+        <p>There's an idea at the heart of this program that is simple but striking: <i>what makes the great great is a sense of destiny.</i> It grew out of a tradition that, by its own account, spent decades studying the life stories of remarkable people — around 1,600 biographies, from Churchill and Gandhi to Marie Curie and Martin Luther King Jr. Reading across those lives, it draws one conclusion: each lived by a clear personal code they rarely changed and returned to for every important decision. That's the program's own founding premise — the lens it offers — not a scientific finding we ask you to take as proven.</p>
+        <p>What it does with that idea is turn it into a guided act of reflection: thirty thoughtful questions about your values, your beliefs, what you'll stand for, and what you'd never do. There are no right or wrong answers. The questions are meant to be sat with, not rushed — a slow, honest conversation with yourself about how you actually want to live.</p>
+        <p>Underneath all thirty is one quiet claim about what a meaningful life needs: three things. A <b>sense of purpose</b> (why am I here?), an <b>opportunity to contribute</b> (what can I give?), and a <b>developing legacy</b> (what will I leave behind?). Discover those three, the program suggests, and you've found your North Star.</p>
+        <div class="how"><b>How it shapes your North Star:</b> this is the soil your North Star grows in — the raw honesty of your values and boundaries, and the conviction that a life lived by a steady inner code is a life with direction.</div>
+      </div>
+    </details>
+    <details class="paper"><summary><span class="who">Jim Collins</span> <span class="work">— aim for a Big Hairy Audacious Goal</span></summary>
+      <div class="body">
+        <p>Jim Collins studies why some companies become truly great while similar ones stay ordinary. In <i>Built to Last</i> (1994) and <i>Good to Great</i> (2001) he gave the world two ideas that work just as well for a single human life as for a company.</p>
+        <p>The first is the <b>BHAG</b> — a "Big Hairy Audacious Goal" (say it "bee-hag"). A real BHAG isn't a tidy to-do item. It has a long horizon (think 10 to 30 years), it's clear and concrete enough that you'll know without argument whether you hit it, and — crucially — it's a little scary. It should make you gulp. A goal that big pulls you forward and organizes years of effort around something that matters.</p>
+        <p>The second is the <b>Hedgehog Concept</b>, built on three overlapping questions: What are you deeply passionate about? What could you be the best in the world at? And what drives your engine — what can you do that the world will actually reward and sustain? The sweet spot sits where all three overlap. Chasing things outside it scatters your energy; living inside it compounds it.</p>
+        <div class="how"><b>How it shapes your North Star:</b> Collins gives your purpose a shape and a test. The three circles locate where your North Star should point — where what you love, what you're built for, and what the world needs all meet. The BHAG turns that into a vivid, decades-long destination. If your statement doesn't make you a little nervous, Collins would gently suggest you aim higher.</div>
+      </div>
+    </details>
+    <details class="paper"><summary><span class="who">Clayton Christensen</span> <span class="work">— hire your life for a job</span></summary>
+      <div class="body">
+        <p>Clayton Christensen was a Harvard Business School professor famous for a deceptively simple question about <i>why</i> people buy things. His answer became "Jobs to Be Done," explored in <i>Competing Against Luck</i> (2016).</p>
+        <p>His classic example: a chain wanted to sell more milkshakes. The breakthrough came when researchers stopped asking "what milkshake do customers want?" and asked "what job are they hiring this milkshake to do?" Many were bought by morning commuters facing a long, boring drive — thick enough to last, easy to manage one-handed. People weren't buying a milkshake; they were hiring it to make a dull commute bearable. Nobody buys a product for its own sake; they hire it to make progress on something in their life.</p>
+        <p>Late in his career, in "How Will You Measure Your Life?" (Harvard Business Review, 2010; later a book), Christensen turned the same lens on living well. The theories that explain great companies, he argued, also explain a great life: be just as deliberate about <i>why</i> you do what you do, and about the relationships and purpose you're really hiring your work and time to serve.</p>
+        <div class="how"><b>How it shapes your North Star:</b> Christensen hands you a clarifying question — what is the real "job" I want my time, work, and relationships to do? Naming it strips away the title, the salary, the things bought because everyone else did, and reveals the deeper progress you're trying to make. That progress is the heart of a true North Star.</div>
+      </div>
+    </details>
+    <details class="paper"><summary><span class="who">Steve Jobs</span> <span class="work">— put a dent in the universe</span></summary>
+      <div class="body">
+        <p>Steve Jobs, co-founder of Apple, is remembered not just for products but for a near-obsessive sense of purpose. His most quoted line captures it: he wanted to "put a <b>dent</b> in the universe" — to do work so meaningful it would visibly change the world. <span class="muted">(It's this phrase Tim riffs on with his own warmer "<b>Ding</b> in the Universe.")</span></p>
+        <p>His clearest statement on how to live came in his 2005 commencement address at Stanford. He told three stories. In the first he described dropping out of college and wandering into a calligraphy class — useless at the time, but a decade later it shaped the typography of the first Macintosh. His lesson: "You can't connect the dots looking forward; you can only connect them looking backwards." You have to trust your steps will eventually add up.</p>
+        <p>He then spoke about mortality with startling directness: "Death is the destination we all share," and remembering you will die is the best tool he knew for making big choices — because almost everything falls away in the face of it, leaving only what truly matters. He closed with the words he grew up admiring: "Stay hungry. Stay foolish."</p>
+        <div class="how"><b>How it shapes your North Star:</b> Jobs offers the boldest version of purpose — aim to leave a real mark. His death lens is a fierce clarifier: imagine your time is short, and notice what still feels worth doing. And "connecting the dots" frees you to commit to a direction before the whole path is visible. Let your North Star be that big, that honest, and that brave.</div>
+      </div>
+    </details>
+    <details class="paper"><summary><span class="who">Tim Latimer</span> <span class="work">— a Lean Canvas for your life</span></summary>
+      <div class="body">
+        <p>Tim Latimer's contribution is to make all of this <i>usable.</i> He's the founder behind Business as a Force for Good and the idea he calls Social Impact Capitalism — the belief that a business can pursue real profit and real good at once, and be stronger for it. He took the sense-of-destiny tradition, Covey's idea that our lives are made of important roles, and his own hard-won purpose statement, and folded them into one practical do-it-yourself method.</p>
+        <p>He calls it <b>a Lean Canvas for your life.</b> In the startup world, the Lean Canvas turns a tangled business plan into a single focused page by asking the right questions in the right order. Tim applies the same move to the most personal question there is — <i>what is my life for?</i> — so a clear answer can emerge with the same speed and clarity. It's a structured journey, not a quiz, and it ends in a written North Star statement you can live by.</p>
+        <p>Anchoring it is his own "Before I Die" purpose, his Prime North Star: <b>"Put a Ding in the Universe through Social Impact Capitalism."</b> That one line sits at the very top. Then every project and role gets its own <b>Local</b> North Star — a smaller, specific purpose that <i>rhymes</i> with the big one — so daily work and life's purpose stay in tune.</p>
+        <div class="how"><b>How it shapes your North Star:</b> this turns reflection into a tool you can hold. You end up with one Prime North Star at the top — your "Ding in the Universe" — and a Local North Star for each thing you take on, each rhyming with the prime. It's how a grand sense of purpose becomes something you can put on a wallet card and use on a Tuesday.</div>
+      </div>
+    </details>
   </div>
 
   <!-- FRAMEWORK -->
@@ -161,8 +232,9 @@
     <ul class="src">
       <li>Stephen R. Covey — <i>The 7 Habits of Highly Effective People</i> (roles, "begin with the end in mind," the funeral exercise)</li>
       <li>Jim Collins — <i>Good to Great</i> (the BHAG)</li>
-      <li>Clayton Christensen — <i>Competing Against Luck</i> (Jobs to Be Done)</li>
-      <li>Steve Jobs — "a ding in the universe"</li>
+      <li>Clayton Christensen — <i>Competing Against Luck</i> &amp; "How Will You Measure Your Life?" (Jobs to Be Done)</li>
+      <li>Steve Jobs — "put a dent in the universe" &amp; the 2005 Stanford commencement address</li>
+      <li>Viktor Frankl — <i>Man's Search for Meaning</i> (purpose &amp; meaning)</li>
       <li>The "Destiny Discovered" sense-of-destiny program — the 30-question instrument</li>
     </ul>
     <div class="note">A note on honesty: the "decades of research across the biographies of remarkable people" is the <b>premise of the Destiny Discovered program</b> — we present it as the tradition this work stands on, not as our own independent study. The strength of a North Star isn't proven by a citation; it's proven the day it makes a hard decision easy.</div>
