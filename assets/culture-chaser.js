@@ -114,6 +114,8 @@
       '.cc-ico.go.cc-buddy{animation-name:cc-buddy}' +
       '.cc-ico.go.cc-coach{animation-name:cc-coach}' +
       '.cc-ico.go.cc-sarge{animation-name:cc-sarge}' +
+      '.cc-art{height:50px;width:auto;display:block;border-radius:9px;transform-origin:bottom center}' +
+      '.cc-thumb{height:42px;width:auto;border-radius:7px;flex:none}' +
       '.cc-txt{min-width:0}' +
       '.cc-name{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--cc,#e8b54d)}' +
       '.cc-line{font-size:11.5px;font-weight:600;color:#dbe7f2;line-height:1.25;overflow:hidden}' +
@@ -226,7 +228,7 @@
       allowed.forEach(function (k) {
         var c = CAST[k];
         html += '<div class="cc-opt" data-k="' + k + '" style="--oc:' + c.accent + '">' +
-          '<span class="oi">' + c.icon + '</span>' +
+          '<img class="oi cc-thumb" src="assets/img/cc-' + k + '.png" alt="' + esc(c.name) + '" draggable="false">' +
           '<span><span class="on">' + c.icon + ' ' + esc(c.name) + '</span><br><span class="ot">' + esc(c.tagline) + '</span></span>' +
           '</div>';
       });
@@ -253,7 +255,7 @@
       badge.className = 'cc-badge';
       badge.style.setProperty('--cc', c.accent);
       badge.innerHTML =
-        '<span class="cc-ico go cc-' + persKey + '">' + c.icon + '</span>' +
+        '<img class="cc-ico cc-art go cc-' + persKey + '" src="assets/img/cc-' + persKey + '.png" alt="' + esc(c.name) + '" draggable="false">' +
         '<span class="cc-txt">' +
           '<span class="cc-name">' + c.icon + ' ' + esc(c.name) + '</span>' +
           '<span class="cc-line"></span>' +
