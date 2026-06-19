@@ -177,7 +177,7 @@
     var id = opts.id || 'default';
     if (ATTACHED[id]) return ATTACHED[id];
     var total = opts.deadlineDays || 90;
-    var label = opts.label || 'your goal';
+    var label = opts.label || (window.HB_CONTEXT && (window.HB_CONTEXT.localNorthStar || window.HB_CONTEXT.title)) || 'your goal';
     var allowed = (opts.allowed && opts.allowed.length) ? opts.allowed.filter(function (k) { return CAST[k]; }) : ORDER.slice();
     var progress = typeof opts.progress === 'function' ? opts.progress : function () { return 0; };
     var K = { start: 'cc-start-' + id, pers: 'cc-pers-' + id, hidden: 'cc-hidden-' + id, voice: 'cc-voice-' + id, pos: 'cc-pos-' + id, seen: 'cc-seen-' + id };
@@ -362,7 +362,7 @@
       clearTimeout(banter);
       banter = setTimeout(function () {
         if (get(K.hidden) !== '1' && get(K.pers) === persKey && progress() < 1) {
-          var q = pickQuip(persKey); showBubble(q); if (get(K.voice) === '1') speak(q, persKey);
+          var q = ((Math.random() < 0.4) && ctxQuip(persKey)) || pickQuip(persKey); showBubble(q); if (get(K.voice) === '1') speak(q, persKey);
         }
         scheduleBanter(persKey);
       }, 24000 + Math.floor(Math.random() * 22000));
@@ -517,6 +517,19 @@
 
   // ---------- helpers ----------
   function dayWord(n) { return n + (Math.abs(n) === 1 ? ' day' : ' days'); }
+  // HB_CONTEXT = the shared page-awareness spine (set per page). Makes the chaser speak to the actual work on screen.
+  function ctxQuip(persKey) {
+    var c = window.HB_CONTEXT; if (!c || !(c.title || c.task)) return '';
+    var where = c.title || 'this page', task = c.task ? (' — ' + c.task) : '';
+    var L = {
+      dash: "You're on " + where + task + ". Tick tock — don't drift.",
+      boo: where + task + ". I see exactly where you are.",
+      buddy: "You're on " + where + task + ". One small step right here? 💛",
+      coach: where + task + " — let's put one on the board right HERE.",
+      sarge: where + task + ". Eyes on the task, recruit."
+    };
+    return L[persKey] || '';
+  }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]; }); }
   function hexToGlow(hex, a) {
     var m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
