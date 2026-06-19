@@ -92,12 +92,14 @@
     var s = document.createElement('style');
     s.id = 'cc-styles';
     s.textContent =
-      '.cc{position:fixed;left:18px;bottom:18px;z-index:16;font-family:"Segoe UI",system-ui,sans-serif;color:#cfe0ef}' +
+      '.cc{position:fixed;left:18px;bottom:18px;z-index:16;touch-action:none;font-family:"Segoe UI",system-ui,sans-serif;color:#cfe0ef}' +
       '.cc *{box-sizing:border-box}' +
       '.cc-badge{display:flex;align-items:center;gap:9px;background:rgba(7,11,16,.86);border:1px solid #20303f;' +
-      'border-left:3px solid var(--cc,#e8b54d);border-radius:13px;padding:7px 12px 7px 9px;cursor:pointer;max-width:280px;' +
+      'border-left:3px solid var(--cc,#e8b54d);border-radius:13px;padding:7px 12px 7px 9px;cursor:grab;max-width:280px;' +
       'box-shadow:0 6px 20px rgba(0,0,0,.4)}' +
       '.cc-badge:hover{border-color:var(--cc,#e8b54d)}' +
+      '.cc.cc-drag,.cc.cc-drag .cc-badge{cursor:grabbing}' +
+      '.cc.cc-glide{transition:left .9s cubic-bezier(.45,0,.25,1),top .9s cubic-bezier(.45,0,.25,1)}' +
       '.cc-ico{font-size:26px;line-height:1;flex:none;display:inline-block;filter:drop-shadow(0 0 6px var(--ccg,rgba(232,181,77,.4)))}' +
       '@keyframes cc-run{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}' +
       // per-personality "chasing" motion — bolder, each speeds up near the deadline via --ccs
@@ -170,7 +172,7 @@
     var allowed = (opts.allowed && opts.allowed.length) ? opts.allowed.filter(function (k) { return CAST[k]; }) : ORDER.slice();
     var def = opts.defaultPersonality && CAST[opts.defaultPersonality] ? opts.defaultPersonality : allowed[0];
     var progress = typeof opts.progress === 'function' ? opts.progress : function () { return 0; };
-    var K = { start: 'cc-start-' + id, pers: 'cc-pers-' + id, hidden: 'cc-hidden-' + id, voice: 'cc-voice-' + id };
+    var K = { start: 'cc-start-' + id, pers: 'cc-pers-' + id, hidden: 'cc-hidden-' + id, voice: 'cc-voice-' + id, pos: 'cc-pos-' + id };
 
     injectStyles();
 
@@ -191,8 +193,10 @@
     function mount() {
       var host = document.body || document.documentElement;
       host.appendChild(root); host.appendChild(showDot);
+      restorePos();
       if (get(K.hidden) === '1') { setHidden(true); } else { render(); }
       tick();
+      scheduleWander();
     }
     if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount);
 
@@ -266,7 +270,7 @@
         if (on) { var q = "Voice on. " + pickQuip(persKey); showBubble(q); speak(q, persKey); }
         else { try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (er) {} }
       });
-      badge.addEventListener('click', function () { openPanel(persKey); });
+      badge.addEventListener('click', function () { if (suppressClick) return; openPanel(persKey); });
       paint(persKey);
       // an instant hello, then ongoing banter
       var hi = pickQuip(persKey);
@@ -370,6 +374,61 @@
 
     showDot.addEventListener('click', function () { setHidden(false); });
 
+    // ---------- drag anywhere + remember the spot (like the world widget) ----------
+    var suppressClick = false, dg = { down: false, moved: false, sx: 0, sy: 0, ox: 0, oy: 0 };
+    function savePos() { try { localStorage.setItem(K.pos, JSON.stringify({ x: root.style.left, y: root.style.top })); } catch (e) {} }
+    function restorePos() {
+      try {
+        var p = JSON.parse(get(K.pos) || 'null'); if (!p || !p.x || !p.y) return;
+        var x = parseInt(p.x, 10), y = parseInt(p.y, 10); if (isNaN(x) || isNaN(y)) return;
+        var w = root.offsetWidth || 200, h = root.offsetHeight || 80;
+        x = Math.max(4, Math.min(x, window.innerWidth - w - 4));
+        y = Math.max(4, Math.min(y, window.innerHeight - h - 4));
+        root.style.left = x + 'px'; root.style.top = y + 'px'; root.style.right = 'auto'; root.style.bottom = 'auto';
+      } catch (e) {}
+    }
+    function onDragMove(e) {
+      if (!dg.down) return;
+      if (!dg.moved && Math.abs(e.clientX - dg.sx) + Math.abs(e.clientY - dg.sy) > 5) { dg.moved = true; root.classList.add('cc-drag'); root.classList.remove('cc-glide'); }
+      if (dg.moved) { root.style.left = (e.clientX - dg.ox) + 'px'; root.style.top = (e.clientY - dg.oy) + 'px'; root.style.right = 'auto'; root.style.bottom = 'auto'; }
+    }
+    function onDragUp() {
+      document.removeEventListener('pointermove', onDragMove); document.removeEventListener('pointerup', onDragUp);
+      dg.down = false; root.classList.remove('cc-drag');
+      if (dg.moved) { savePos(); suppressClick = true; setTimeout(function () { suppressClick = false; }, 60); }
+    }
+    root.addEventListener('pointerdown', function (e) {
+      var t = e.target;
+      if (t.closest && t.closest('.cc-x,.cc-v,.cc-btn,.cc-opt')) return;     // let the controls click
+      if (!t.closest || !t.closest('.cc-badge')) return;                     // drag only by grabbing the badge
+      dg.down = true; dg.moved = false;
+      var r = root.getBoundingClientRect();
+      dg.ox = e.clientX - r.left; dg.oy = e.clientY - r.top; dg.sx = e.clientX; dg.sy = e.clientY;
+      document.addEventListener('pointermove', onDragMove); document.addEventListener('pointerup', onDragUp);
+    });
+
+    // ---------- wander: every so often it scurries off on its own — you chase it back ----------
+    var wander = null;
+    var WANDER_LINES = ['Over here now. Keep up.', 'You blinked — so I moved.', 'Catch me. I dare you.', 'Peekaboo. New spot.', "Can't pin me down."];
+    function moveToRandom() {
+      var w = root.offsetWidth || 200, h = root.offsetHeight || 80;
+      var x = Math.max(8, Math.floor(Math.random() * (window.innerWidth - w - 16)));
+      var y = Math.max(8, Math.floor(Math.random() * (window.innerHeight - h - 16)));
+      root.classList.add('cc-glide');
+      root.style.left = x + 'px'; root.style.top = y + 'px'; root.style.right = 'auto'; root.style.bottom = 'auto';
+      savePos();
+      var pers = get(K.pers);
+      if (pers && CAST[pers]) { var q = WANDER_LINES[Math.floor(Math.random() * WANDER_LINES.length)]; showBubble(q); if (get(K.voice) === '1') speak(q, pers); }
+    }
+    function scheduleWander() {
+      if (REDUCE) return;                                  // respect reduced-motion: no autonomous movement
+      clearTimeout(wander);
+      wander = setTimeout(function () {
+        if (get(K.hidden) !== '1' && get(K.pers) && CAST[get(K.pers)] && !dg.down && !root.querySelector('.cc-pop')) moveToRandom();
+        scheduleWander();
+      }, 55000 + Math.floor(Math.random() * 70000));        // every ~55–125s
+    }
+
     function tick() {
       var pers = get(K.pers);
       if (get(K.hidden) !== '1' && pers && CAST[pers]) paint(pers);
@@ -380,7 +439,7 @@
     var instance = {
       destroy: function () {
         if (timer) clearInterval(timer);
-        clearTimeout(banter);
+        clearTimeout(banter); clearTimeout(wander);
         window.removeEventListener('focus', tick);
         root.remove(); showDot.remove();
         delete ATTACHED[id];
