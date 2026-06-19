@@ -87,6 +87,9 @@
     }
   };
   var ORDER = ['dash', 'boo', 'buddy', 'coach', 'sarge'];
+  // heartbroken off-switch — in-character goodbye on dismiss + a "while you were gone" welcome on return
+  var BYE = { dash: "Fine, fine — I'll be in the corner. Catch me later.", boo: "I never really leave. You know that.", buddy: "Okay! I'll be right here, cheering quietly. 💛", coach: "Timeout taken — I'll have the playbook ready.", sarge: "Dismissed — but I hold this line till you're back, recruit." };
+  var BACK = { dash: "You were gone a while — I lapped the page 200 times. Let's GO!", boo: "You returned. They always return.", buddy: "You're back! I kept your spot warm. 💛", coach: "Back on the field — let's pick the momentum right back up.", sarge: "Welcome back, recruit. The line held. Now move." };
 
   // ---------- shared styles ----------
   function injectStyles() {
@@ -103,7 +106,7 @@
       '.cc.cc-drag,.cc.cc-drag .cc-badge{cursor:grabbing}' +
       '.cc.cc-glide{transition:left .9s cubic-bezier(.45,0,.25,1),top .9s cubic-bezier(.45,0,.25,1)}' +
       // 3-level puppet: facing > bounce > breathing art
-      '.cc-puppet{flex:none;transform:scaleX(var(--face,1));transform-origin:bottom center;cursor:pointer}' +
+      '.cc-puppet{flex:none;transform:scaleX(var(--face,1)) rotate(var(--lean,0deg));transform-origin:bottom center;cursor:pointer;transition:transform .18s ease-out}' +
       '.cc-bounce{transform-origin:bottom center}' +
       '.cc-art{height:52px;width:auto;display:block;border-radius:9px;transform-origin:bottom center;' +
       'animation:cc-breathe 3.2s ease-in-out infinite;' +
@@ -177,7 +180,7 @@
     var label = opts.label || 'your goal';
     var allowed = (opts.allowed && opts.allowed.length) ? opts.allowed.filter(function (k) { return CAST[k]; }) : ORDER.slice();
     var progress = typeof opts.progress === 'function' ? opts.progress : function () { return 0; };
-    var K = { start: 'cc-start-' + id, pers: 'cc-pers-' + id, hidden: 'cc-hidden-' + id, voice: 'cc-voice-' + id, pos: 'cc-pos-' + id };
+    var K = { start: 'cc-start-' + id, pers: 'cc-pers-' + id, hidden: 'cc-hidden-' + id, voice: 'cc-voice-' + id, pos: 'cc-pos-' + id, seen: 'cc-seen-' + id };
 
     injectStyles();
 
@@ -268,7 +271,7 @@
           '<span class="cc-bar"><i></i></span>' +
         '</span>';
       root.appendChild(x); root.appendChild(v); root.appendChild(badge);
-      x.addEventListener('click', function (e) { e.stopPropagation(); setHidden(true); });
+      x.addEventListener('click', function (e) { e.stopPropagation(); var bl = BYE[persKey] || "I'll be right here."; showBubble(bl); if (get(K.voice) === '1') speak(bl, persKey); setTimeout(function () { setHidden(true); }, 2600); });
       v.addEventListener('click', function (e) {
         e.stopPropagation();
         var on = get(K.voice) !== '1'; set(K.voice, on ? '1' : '0'); v.textContent = on ? '🔊' : '🔇';
@@ -284,7 +287,8 @@
       // click the text -> open the "why" panel
       badge.addEventListener('click', function () { if (suppressClick) return; openPanel(persKey); });
       paint(persKey);
-      var hi = pickQuip(persKey);
+      var away = (function () { var ls = parseInt(get(K.seen), 10); return !isNaN(ls) && (Date.now() - ls) > 72000000; })();
+      var hi = (away && BACK[persKey]) ? BACK[persKey] : pickQuip(persKey);
       setTimeout(function () { if (get(K.pers) === persKey && get(K.hidden) !== '1') { showBubble(hi); if (get(K.voice) === '1') speak(hi, persKey); } }, 900);
       scheduleBanter(persKey);
       scheduleJump(persKey);
@@ -401,7 +405,7 @@
         else { try { window.speechSynthesis.cancel(); } catch (e) {} }
       });
       pop.querySelector('[data-a="change"]').addEventListener('click', function () { del(K.pers); render(); });
-      pop.querySelector('[data-a="off"]').addEventListener('click', function () { setHidden(true); });
+      pop.querySelector('[data-a="off"]').addEventListener('click', function () { var bl = BYE[persKey] || "I'll be right here."; pop.remove(); showBubble(bl); if (get(K.voice) === '1') speak(bl, persKey); setTimeout(function () { setHidden(true); }, 2600); });
     }
 
     showDot.addEventListener('click', function () { setHidden(false); });
@@ -430,6 +434,19 @@
     }
     var rzT = null, onResize = function () { clearTimeout(rzT); rzT = setTimeout(clampIntoView, 200); };
     window.addEventListener('resize', onResize);
+    // gaze: the character leans/turns toward your cursor ("it sees me")
+    var gazeRAF = 0, onGaze = function (e) {
+      if (REDUCE || dg.down || get(K.hidden) === '1' || gazeRAF) return;
+      var mx = e.clientX, my = e.clientY;
+      gazeRAF = requestAnimationFrame(function () {
+        gazeRAF = 0;
+        var pup = root.querySelector('.cc-puppet'); if (!pup) return;
+        var r = root.getBoundingClientRect(); var dx = mx - (r.left + r.width / 2);
+        pup.style.setProperty('--lean', Math.max(-11, Math.min(11, dx / 22)).toFixed(1) + 'deg');
+        if (Math.abs(dx) > 45) pup.style.setProperty('--face', dx < 0 ? -1 : 1);
+      });
+    };
+    document.addEventListener('mousemove', onGaze);
     function onDragMove(e) {
       if (!dg.down) return;
       if (!dg.moved && Math.abs(e.clientX - dg.sx) + Math.abs(e.clientY - dg.sy) > 5) { dg.moved = true; root.classList.add('cc-drag'); root.classList.remove('cc-glide'); }
@@ -479,6 +496,7 @@
 
     function tick() {
       var pers = get(K.pers);
+      try { set(K.seen, String(Date.now())); } catch (e) {}
       if (get(K.hidden) !== '1' && pers && CAST[pers]) paint(pers);
     }
     timer = setInterval(tick, 3000);
@@ -488,7 +506,8 @@
       destroy: function () {
         if (timer) clearInterval(timer);
         clearTimeout(banter); clearTimeout(wander); clearTimeout(jumper);
-        window.removeEventListener('focus', tick); window.removeEventListener('resize', onResize);
+        window.removeEventListener('focus', tick); window.removeEventListener('resize', onResize); document.removeEventListener('mousemove', onGaze);
+        if (gazeRAF) cancelAnimationFrame(gazeRAF);
         root.remove(); showDot.remove(); delete ATTACHED[id];
       }
     };
