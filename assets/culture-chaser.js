@@ -67,7 +67,18 @@
       '.cc-badge:hover{border-color:var(--cc,#e8b54d)}' +
       '.cc-ico{font-size:26px;line-height:1;flex:none;display:inline-block;filter:drop-shadow(0 0 6px var(--ccg,rgba(232,181,77,.4)))}' +
       '@keyframes cc-run{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}' +
+      // per-personality "chasing" motion — each speeds up near the deadline via --ccs
+      '@keyframes cc-dash{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}' +
+      '@keyframes cc-boo{0%,100%{transform:translateY(0) scale(1);opacity:.8}50%{transform:translateY(-3px) scale(1.08);opacity:1}}' +
+      '@keyframes cc-buddy{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}' +
+      '@keyframes cc-coach{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-5px) rotate(6deg)}}' +
+      '@keyframes cc-sarge{0%{transform:translateX(-4px) rotate(-2deg)}50%{transform:translateX(4px) rotate(2deg)}100%{transform:translateX(-4px) rotate(-2deg)}}' +
       '.cc-ico.go{animation:cc-run var(--ccs,2.4s) ease-in-out infinite}' +
+      '.cc-ico.go.cc-dash{animation-name:cc-dash;animation-timing-function:cubic-bezier(.2,.85,.2,1)}' +   /* twitchy, impatient */
+      '.cc-ico.go.cc-boo{animation-name:cc-boo}' +                                                          /* looms + flickers */
+      '.cc-ico.go.cc-buddy{animation-name:cc-buddy}' +                                                      /* gentle hop */
+      '.cc-ico.go.cc-coach{animation-name:cc-coach}' +                                                      /* peppy cheer-bounce */
+      '.cc-ico.go.cc-sarge{animation-name:cc-sarge}' +                                                      /* paces back & forth */
       '.cc-txt{min-width:0}' +
       '.cc-name{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--cc,#e8b54d)}' +
       '.cc-line{font-size:11.5px;font-weight:600;color:#dbe7f2;line-height:1.25;overflow:hidden}' +
@@ -99,7 +110,7 @@
       'background:rgba(7,11,16,.82);border:1px solid #20303f;font-size:17px;line-height:32px;text-align:center}' +
       '.cc-bar{height:5px;border-radius:4px;background:#16212c;overflow:hidden;margin-top:3px}' +
       '.cc-bar i{display:block;height:100%;background:var(--cc,#e8b54d);width:0}' +
-      '@media (prefers-reduced-motion:reduce){.cc-ico.go{animation:none}}' +
+      '@media (prefers-reduced-motion:reduce){.cc-ico{animation:none!important}}' +
       // bigger tap targets on touch devices
       '@media (pointer:coarse){.cc-x{width:34px;height:34px;line-height:32px;font-size:15px}.cc-show{width:44px;height:44px;line-height:42px;font-size:20px}}' +
       '@media (max-width:560px){.cc{left:10px;bottom:10px}.cc-badge{max-width:220px}}';
@@ -207,7 +218,7 @@
       badge.className = 'cc-badge';
       badge.style.setProperty('--cc', c.accent);
       badge.innerHTML =
-        '<span class="cc-ico go">' + c.icon + '</span>' +
+        '<span class="cc-ico go cc-' + persKey + '">' + c.icon + '</span>' +
         '<span class="cc-txt">' +
           '<span class="cc-name">' + c.icon + ' ' + esc(c.name) + '</span>' +
           '<span class="cc-line"></span>' +
