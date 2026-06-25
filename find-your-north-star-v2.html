@@ -1,0 +1,136 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Find Your North Star — HB1000</title>
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<style>
+  :root{--ink:#eaf1f7;--muted:#9fb1c1;--soft:#6f8295;--gold:#e8b54d;--teal:#36c2b4;--cyan:#74a6ff;--line:#20303f;--panel:#0f1620}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;color:var(--ink);font-family:"Segoe UI",system-ui,sans-serif;
+    background:radial-gradient(1100px 760px at 50% 18%,#0e1726,#070b10 60%,#04060a)}
+  a{color:inherit}
+  .wrap{max-width:680px;margin:0 auto;padding:34px 18px 60px}
+  .hero{display:block;width:100%;max-width:600px;margin:2px auto 14px;border-radius:16px;box-shadow:0 16px 50px #000a,0 0 0 1px var(--line)}
+  .cap{text-align:center;margin:7px auto 2px;max-width:520px;font-size:12.5px;color:var(--muted);font-style:italic}
+  .cap b{color:var(--gold);font-style:normal}
+  h1{text-align:center;font-size:30px;margin:8px 0 6px;letter-spacing:-.01em}
+  h1 b{color:var(--gold)}
+  .lede{text-align:center;color:var(--muted);max-width:580px;margin:0 auto;font-size:15.5px;line-height:1.65}
+  .lede b{color:var(--ink);font-weight:700}
+
+  .bigdoor{background:linear-gradient(135deg,#1a1304,#120c02);border:1.5px solid var(--gold);border-radius:18px;
+    padding:24px 22px;margin:24px 0 8px;box-shadow:0 18px 50px #0009}
+  .bigdoor .eyebrow{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--gold)}
+  .bigdoor h2{font-size:23px;margin:8px 0 6px;letter-spacing:-.01em}
+  .bigdoor p{color:var(--muted);font-size:14.5px;line-height:1.6;margin:0 0 14px}
+  .example{border-left:3px solid var(--gold);background:#0c0a04;border-radius:0 12px 12px 0;padding:11px 14px;margin:0 0 18px}
+  .example .el{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);font-weight:800}
+  .example .ex{font-size:14.5px;color:#ffe9a8;line-height:1.55;font-style:italic;margin-top:5px}
+  .bigbtn{display:inline-flex;align-items:center;gap:9px;font-weight:800;font-size:16px;color:#1a1206;
+    background:linear-gradient(135deg,#f7d68c,var(--gold) 60%,#a5762a);border:none;border-radius:999px;padding:13px 26px;text-decoration:none}
+  .bigbtn:hover{filter:brightness(1.07)}
+  .trust{font-size:12px;color:var(--teal);margin-top:13px;font-weight:700}
+
+  .song{display:flex;align-items:center;gap:14px;max-width:520px;margin:20px auto 2px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+  .songbtn{flex:0 0 auto;width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;font-size:16px;color:#1a1206;background:linear-gradient(135deg,#f7d68c,var(--gold) 60%,#a5762a);display:grid;place-items:center}
+  .songbtn:hover{filter:brightness(1.08)}
+  .songmeta .songt{font-weight:800;font-size:13px}
+  .songmeta .songd{color:var(--muted);font-size:12px;margin-top:2px;line-height:1.45}
+
+  .deeper{margin:32px 0 6px}
+  .deeper-h{text-align:center;font-size:13px;color:var(--soft);font-weight:700;margin-bottom:14px}
+  .mini{display:flex;align-items:center;gap:13px;background:var(--panel);border:1px solid var(--line);border-radius:13px;
+    padding:15px 16px;text-decoration:none;color:inherit;margin-bottom:10px;transition:.16s}
+  .mini:hover{border-color:var(--cyan);transform:translateY(-2px)}
+  .mini .mbody{flex:1}
+  .mini .mt{font-weight:800;font-size:14.5px}
+  .mini .mtime{font-size:12px;color:var(--soft);font-weight:700;margin:1px 0 3px}
+  .mini .md{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .mini .mgo{color:var(--cyan);font-weight:800;font-size:13px;white-space:nowrap}
+
+  .rtile{display:flex;align-items:center;gap:14px;max-width:680px;margin:20px auto 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;text-decoration:none;color:inherit;transition:.16s}
+  .rtile:hover{border-color:var(--gold);transform:translateY(-2px)}
+  .foot{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);text-align:center;color:var(--soft);font-size:12.5px;line-height:1.7}
+  .star{color:var(--gold)}
+</style></head>
+<body>
+<div class="wrap">
+  <img class="hero" src="assets/img/two-paths-one-star.webp" alt="Two glowing paths rising to a single gold star — a fast golden arc on the left, a long winding stepped climb on the right — both reaching the same summit">
+  <p class="cap"><b>Two ways to do this.</b> A quick one and a deep one. Most people start with the quick one.</p>
+  <h1>Find Your <b>North Star</b></h1>
+  <p class="lede">Your North Star is <b>the one thing your life is for</b> — the sentence that helps you decide what matters most. Most people never write it down, because a blank page is hard. So we don't hand you a blank page. We give you a <b>first draft in about 8 minutes</b>, and then you make it yours.</p>
+
+  <!-- THE ONE LOUD DOOR -->
+  <div class="bigdoor">
+    <div class="eyebrow">★ Start here · about 8 minutes</div>
+    <h2>Get your first North Star</h2>
+    <p>Answer 8 quick questions. We write you a first draft. Then you change a few words until it sounds like you. That's it.</p>
+    <div class="example">
+      <div class="el">Here's what one looks like</div>
+      <div class="ex">"To lift the left out and the left behind with dignity — so that people who were counted out get more out of life."</div>
+    </div>
+    <a class="bigbtn" href="universal-basic-purpose-v2.html">Begin →</a>
+    <div class="trust">✓ No sign-up. Your answers stay private on your device.</div>
+  </div>
+
+  <div class="song">
+    <audio id="nsSong" preload="none" src="assets/what-grows-here.mp3"></audio>
+    <button class="songbtn" id="songBtn" aria-label="Play the North Star theme song">▶</button>
+    <div class="songmeta">
+      <div class="songt">♪ "What Grows Here" — the North Star theme</div>
+      <div class="songd">A man plants a maple he'll never sit under. Press play while you find yours.</div>
+    </div>
+  </div>
+
+  <!-- DEEPER PATHS — quieter, framed as "later" -->
+  <div class="deeper">
+    <div class="deeper-h">Want to go deeper? (after you have your first one)</div>
+
+    <a class="mini" href="north-star-workshop.html">
+      <span class="mbody">
+        <span class="mt">The Workshop</span>
+        <span class="mtime">About 45–90 minutes · 12 guided steps</span>
+        <span class="md">A longer, guided version with Tim's own example answers walking you through each step.</span>
+      </span>
+      <span class="mgo">Open →</span>
+    </a>
+
+    <a class="mini" href="destiny-discovered.html">
+      <span class="mbody">
+        <span class="mt">Destiny Discovered</span>
+        <span class="mtime">The deep version · 30 questions · weeks to months</span>
+        <span class="md">30 questions you take your time with, coming back as life shows you more. The full, honest dig into your "why."</span>
+      </span>
+      <span class="mgo">Open →</span>
+    </a>
+  </div>
+
+  <a class="rtile" href="research.html">
+    <span style="font-size:26px">★</span>
+    <span style="flex:1">
+      <span style="display:block;font-weight:800;color:#fff;font-size:15.5px">The Research Behind Your North Star</span>
+      <span style="display:block;color:var(--muted);font-size:13px;margin-top:2px">Why this works, and the people behind the idea.</span>
+    </span>
+    <span style="color:var(--gold);font-weight:800;font-size:14px;white-space:nowrap">Read →</span>
+  </a>
+
+  <div class="foot">
+    <span class="star">★</span> Your <b style="color:var(--ink)">North Star</b> is the one sentence everything else aims at.
+    Find it, write it down, and let it guide what you do next.
+  </div>
+</div>
+<script>
+(function(){
+  var a=document.getElementById('nsSong'), b=document.getElementById('songBtn');
+  if(!a||!b) return;
+  b.addEventListener('click',function(){
+    if(a.paused){ a.play().then(function(){ b.textContent='⏸'; }).catch(function(){}); }
+    else { a.pause(); b.textContent='▶'; }
+  });
+  a.addEventListener('ended',function(){ b.textContent='▶'; });
+})();
+</script>
+<script src="assets/living-wallpaper.js?v=2"></script>
+<script>window.HB_CONTEXT={page:'north-star-hub',title:'Find Your North Star',task:'choosing your path up the mountain',localNorthStar:'your North Star',primeNorthStar:null};</script>
+<script src="assets/culture-chaser.js?v=10"></script>
+<script>CultureChaser.attach({id:'north-star',label:'your North Star',deadlineDays:90,chooserOnLoad:false,progress:CultureChaser.northStarProgress});</script>
+</body></html>

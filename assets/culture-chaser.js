@@ -180,6 +180,10 @@
     var label = opts.label || (window.HB_CONTEXT && (window.HB_CONTEXT.localNorthStar || window.HB_CONTEXT.title)) || 'your goal';
     var allowed = (opts.allowed && opts.allowed.length) ? opts.allowed.filter(function (k) { return CAST[k]; }) : ORDER.slice();
     var progress = typeof opts.progress === 'function' ? opts.progress : function () { return 0; };
+    // chooserOnLoad: when false, the persona picker starts collapsed to a quiet
+    // chip (tap to open) instead of covering the page on first visit. Default
+    // true preserves the original behavior for every page that doesn't opt out.
+    var chooserOnLoad = opts.chooserOnLoad !== false;
     var K = { start: 'cc-start-' + id, pers: 'cc-pers-' + id, hidden: 'cc-hidden-' + id, voice: 'cc-voice-' + id, pos: 'cc-pos-' + id, seen: 'cc-seen-' + id };
 
     injectStyles();
@@ -244,6 +248,7 @@
       stub.style.setProperty('--cc', '#e8b54d');
       stub.innerHTML = '<span class="cc-name" style="font-size:13px">🏁 Culture Chaser</span>';
       root.appendChild(pop); root.appendChild(stub);
+      if (!chooserOnLoad) pop.style.display = 'none'; // quiet chip first; opens on tap
       pop.querySelectorAll('.cc-opt').forEach(function (el) {
         el.addEventListener('click', function () { set(K.pers, el.getAttribute('data-k')); render(); });
       });
