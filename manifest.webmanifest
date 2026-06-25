@@ -1,0 +1,15 @@
+{
+  "name": "Find Your North Star",
+  "short_name": "North Star",
+  "description": "Find your North Star — the one thing your life is for.",
+  "start_url": "find-your-north-star-v2.html",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070b10",
+  "theme_color": "#070b10",
+  "icons": [
+    { "src": "assets/img/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/img/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
