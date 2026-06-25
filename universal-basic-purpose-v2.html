@@ -177,6 +177,33 @@
       <p class="hint" id="keepMsg" style="margin-top:10px">📌 Tip: bookmark this page. Come back anytime and it remembers your North Star.</p>
     </div>
 
+    <!-- CLOUD ACCOUNT — stays hidden until a Firebase web config is added (Google + email/password) -->
+    <div id="account" class="keep hidden">
+      <div class="step" style="color:var(--cyan)">Save to your account — on every device</div>
+      <div id="acctOut">
+        <p class="hint" style="margin-top:6px">Sign in once and your North Star follows you to any phone or computer. Change it anytime.</p>
+        <div class="row2" style="margin-top:10px">
+          <button class="btn" id="btnGoogle">Continue with Google</button>
+        </div>
+        <p class="hint" style="margin-top:12px">or use your email:</p>
+        <input class="field" id="acctEmail" type="email" placeholder="you@email.com" autocomplete="email">
+        <input class="field" id="acctPass" type="password" placeholder="a password (6+ characters)" autocomplete="current-password" style="margin-top:8px">
+        <div class="row2" style="margin-top:8px">
+          <button class="btn ghost" id="btnSignin">Sign in</button>
+          <button class="btn ghost" id="btnSignup">Create account</button>
+        </div>
+        <p class="hint" id="acctMsg" style="margin-top:10px"></p>
+      </div>
+      <div id="acctIn" class="hidden">
+        <p class="hint" id="acctWho" style="margin-top:6px"></p>
+        <div class="row2" style="margin-top:8px">
+          <button class="btn" id="btnCloudSave">Save to my account ★</button>
+          <button class="btn ghost" id="btnSignout">Sign out</button>
+        </div>
+        <p class="hint" id="acctSaveMsg" style="margin-top:10px"></p>
+      </div>
+    </div>
+
     <p class="hint" style="margin-top:14px">This is a <b>living v1</b> — done beats perfect. Come back and change it as life shows you more. When you're ready to go deeper:</p>
     <div class="row2">
       <a class="btn" href="north-star-workshop.html">Deepen in the Workshop →</a>
@@ -410,6 +437,95 @@
       $('newOne').onclick=function(){$('welcome').classList.add('hidden');$('s-intro').classList.remove('hidden');};
     }
   })();
+
+  // hooks for the cloud-account script (which runs in its own scope)
+  window.NS_current=function(){return curStar();};
+  window.NS_loadStar=function(s){
+    $('fprime').textContent=s.prime||'';$('flocal').textContent=s.local||'';$('fpromise').textContent=s.promise||'';
+    if(s.name&&$('certName'))$('certName').value=s.name;
+    try{localStorage.setItem('ubp-northstar',JSON.stringify(s));}catch(e){}
+    if($('welcome'))$('welcome').classList.add('hidden');
+    show('s-done');
+  };
+})();
+</script>
+<script>
+/* ===== North Star cloud account — Firebase (Google + email/password) =====
+   SETUP (you / Fidel, in the Firebase console for project hb1000-os):
+     1) Project settings -> Your apps -> add a Web app -> paste its config below.
+     2) Authentication -> Sign-in method -> enable Google AND Email/Password.
+     3) Authentication -> Settings -> Authorized domains -> add  timjlatimer.github.io
+   Firestore rules already allow users/{uid}/** , so no rules change is needed.
+   Until a real apiKey is pasted below, this whole section stays hidden and the
+   page behaves exactly as before. */
+(function(){
+  var firebaseConfig = {
+    apiKey: "PASTE_API_KEY_HERE",
+    authDomain: "hb1000-os.firebaseapp.com",
+    projectId: "hb1000-os",
+    storageBucket: "hb1000-os.appspot.com",
+    messagingSenderId: "PASTE_SENDER_ID_HERE",
+    appId: "PASTE_APP_ID_HERE"
+  };
+  if(firebaseConfig.apiKey.indexOf("PASTE")!==-1) return; // not configured yet -> stay hidden
+  var $=function(id){return document.getElementById(id);};
+  if($('account')) $('account').classList.remove('hidden');
+
+  function load(src){return new Promise(function(res,rej){var s=document.createElement('script');s.src=src;s.onload=res;s.onerror=function(){rej(new Error('load '+src));};document.head.appendChild(s);});}
+  var B='https://www.gstatic.com/firebasejs/10.12.2/';
+  load(B+'firebase-app-compat.js')
+    .then(function(){return load(B+'firebase-auth-compat.js');})
+    .then(function(){return load(B+'firebase-firestore-compat.js');})
+    .then(init)
+    .catch(function(){ if($('acctMsg'))$('acctMsg').textContent='Could not load sign-in. Check your connection.'; });
+
+  function init(){
+    firebase.initializeApp(firebaseConfig);
+    var auth=firebase.auth(), db=firebase.firestore();
+    function ref(uid){return db.collection('users').doc(uid).collection('northstar').doc('current');}
+    function msg(t){ if($('acctMsg'))$('acctMsg').textContent=t||''; }
+    function smsg(t){ if($('acctSaveMsg'))$('acctSaveMsg').textContent=t||''; }
+    function star(){ return (window.NS_current?window.NS_current():{}); }
+    function save(u){var s=star();return ref(u.uid).set({prime:s.prime||'',local:s.local||'',promise:s.promise||'',name:s.name||'',updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});}
+    function friendly(e){var c=(e&&e.code)||'';
+      if(c.indexOf('wrong-password')!==-1||c.indexOf('invalid-credential')!==-1) return 'That email or password did not match. Try again, or create an account.';
+      if(c.indexOf('email-already-in-use')!==-1) return 'That email already has an account — try Sign in instead.';
+      if(c.indexOf('weak-password')!==-1) return 'Please use a password with at least 6 characters.';
+      if(c.indexOf('invalid-email')!==-1) return 'That does not look like an email address.';
+      return (e&&e.message)||'Something went wrong. Try again.';
+    }
+
+    var gp=new firebase.auth.GoogleAuthProvider();
+    if($('btnGoogle'))$('btnGoogle').onclick=function(){ msg('Opening Google sign-in…'); auth.signInWithPopup(gp).catch(function(e){ if(((e.code||'').indexOf('popup'))!==-1){auth.signInWithRedirect(gp);} else msg(friendly(e)); }); };
+    if($('btnSignin'))$('btnSignin').onclick=function(){ msg('Signing in…'); auth.signInWithEmailAndPassword((($('acctEmail').value)||'').trim(),$('acctPass').value||'').catch(function(e){msg(friendly(e));}); };
+    if($('btnSignup'))$('btnSignup').onclick=function(){ msg('Creating your account…'); auth.createUserWithEmailAndPassword((($('acctEmail').value)||'').trim(),$('acctPass').value||'').catch(function(e){msg(friendly(e));}); };
+    if($('btnSignout'))$('btnSignout').onclick=function(){ auth.signOut(); };
+    if($('btnCloudSave'))$('btnCloudSave').onclick=function(){ var u=auth.currentUser; if(!u)return; smsg('Saving…'); save(u).then(function(){smsg('✓ Saved to your account. It is on every device now.');}).catch(function(e){smsg('Could not save: '+e.message);}); };
+
+    auth.getRedirectResult().catch(function(){});
+
+    auth.onAuthStateChanged(function(u){
+      if(u){
+        $('acctOut').classList.add('hidden'); $('acctIn').classList.remove('hidden');
+        $('acctWho').textContent='Signed in as '+(u.email||'your account')+'.';
+        ref(u.uid).get().then(function(snap){
+          var local=null; try{local=JSON.parse(localStorage.getItem('ubp-northstar')||'null');}catch(e){}
+          var introVisible = $('s-intro') && !$('s-intro').classList.contains('hidden');
+          if(snap.exists){
+            var d=snap.data();
+            if((!local || introVisible) && d.prime && window.NS_loadStar){ window.NS_loadStar({prime:d.prime,local:d.local,promise:d.promise,name:d.name}); }
+            smsg('✓ Your North Star is saved to your account.');
+          } else {
+            var s=star();
+            if(s.prime){ save(u).then(function(){smsg('✓ Saved to your account.');}).catch(function(e){smsg('Could not save: '+e.message);}); }
+            else smsg('Finish your North Star above, then tap “Save to my account”.');
+          }
+        }).catch(function(e){ smsg('Could not reach your account: '+e.message); });
+      } else {
+        $('acctIn').classList.add('hidden'); $('acctOut').classList.remove('hidden'); msg('');
+      }
+    });
+  }
 })();
 </script>
 <script src="assets/living-wallpaper.js?v=2"></script>
