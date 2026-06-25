@@ -54,12 +54,42 @@
   .row2{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
   .center{text-align:center}
   .tiny{font-size:11.5px;color:var(--soft)}
+  .keep{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
   .hidden{display:none}
+
+  /* keepsake certificate — only appears when you print / save as PDF */
+  @media screen{ #cert{display:none} }
+  @media print{
+    @page{margin:14mm}
+    body{background:#fff !important}
+    .wrap,.cc,.cc-show{display:none !important}
+    #cert{display:block !important}
+  }
+  #cert{color:#1a1a1a;font-family:Georgia,"Times New Roman",serif}
+  #cert .ci{max-width:720px;margin:0 auto;border:3px solid #c69a3a;border-radius:16px;padding:42px 46px;text-align:center;background:#fffdf7}
+  #cert .cstar{font-size:42px;color:#c69a3a;line-height:1}
+  #cert .ckick{letter-spacing:.22em;font-size:13px;font-weight:bold;color:#9a7320;margin:8px 0 4px}
+  #cert .cname{font-size:20px;font-style:italic;color:#333;margin:10px 0 20px}
+  #cert .cb{margin:16px 0}
+  #cert .cl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#9a7320;font-weight:bold;margin-bottom:5px}
+  #cert .cprime{font-size:19px;line-height:1.5}
+  #cert .cloc,#cert .cpro{font-size:15px;line-height:1.5;color:#333}
+  #cert .cfoot{margin-top:28px;font-size:12px;color:#888;border-top:1px solid #e3d8b8;padding-top:12px;letter-spacing:.04em}
 </style></head>
 <body>
 <div class="wrap">
   <h1>Your <b>North Star</b>, in about 8 minutes</h1>
   <p class="lede">Answer a few quick questions. We'll write you a first draft — a <em>big-picture North Star</em> for your whole life, and an <em>everyday one</em> for what you're working on right now. Then you make it yours. <span class="tiny">It's a first version; you'll come back and change it. Your answers stay on this device.</span></p>
+
+  <!-- WELCOME BACK (shown only if a saved North Star is found on this device) -->
+  <div id="welcome" class="card hidden" style="border-color:var(--gold);background:#120c02">
+    <div class="step" style="color:var(--gold)">★ Welcome back — your North Star is saved on this device</div>
+    <p class="dtext" id="welcomePrime" style="margin-top:8px"></p>
+    <div class="row2" style="margin-top:8px">
+      <button class="btn" id="viewSaved">View &amp; keep my North Star →</button>
+      <button class="btn ghost" id="newOne">Start a new one</button>
+    </div>
+  </div>
 
   <!-- INTRO -->
   <div id="s-intro" class="card center">
@@ -132,6 +162,21 @@
       <div class="label c" style="margin-top:14px">◆ Local North Star — your right-now one</div><div class="dtext" id="flocal"></div>
       <div class="label" style="margin-top:14px;color:var(--teal)">↻ My first promise</div><div class="dtext" id="fpromise"></div>
     </div>
+
+    <!-- KEEP IT — give the user something permanent they own -->
+    <div class="keep">
+      <div class="step" style="color:var(--teal)">Keep your North Star — it's yours</div>
+      <p class="hint" style="margin-top:6px">It's already saved on this device. To keep a copy you'll <b>always</b> have, do one of these:</p>
+      <p class="label" style="margin-top:14px">Your name (for your certificate)</p>
+      <input class="field" id="certName" placeholder="e.g., Tim Latimer" autocomplete="name">
+      <div class="row2" style="margin-top:12px">
+        <button class="btn" id="btnCert">📄 Save my certificate (PDF)</button>
+        <button class="btn ghost" id="btnEmail">✉️ Email it to me</button>
+        <button class="btn ghost" id="btnCopy">📋 Copy</button>
+      </div>
+      <p class="hint" id="keepMsg" style="margin-top:10px">📌 Tip: bookmark this page. Come back anytime and it remembers your North Star.</p>
+    </div>
+
     <p class="hint" style="margin-top:14px">This is a <b>living v1</b> — done beats perfect. Come back and change it as life shows you more. When you're ready to go deeper:</p>
     <div class="row2">
       <a class="btn" href="north-star-workshop.html">Deepen in the Workshop →</a>
@@ -142,6 +187,17 @@
 
   <p class="center" style="margin-top:22px"><a class="tiny" href="find-your-north-star-v2.html" style="color:var(--soft)">← all the ways to find your North Star</a></p>
 </div>
+
+<!-- printable keepsake certificate (hidden on screen; appears only when printing / saving as PDF) -->
+<div id="cert"><div class="ci">
+  <div class="cstar">★</div>
+  <div class="ckick">MY NORTH STAR</div>
+  <div class="cname" id="certNameOut"></div>
+  <div class="cb"><div class="cl">My big-picture North Star</div><div class="cprime" id="certPrime"></div></div>
+  <div class="cb"><div class="cl">My right-now North Star</div><div class="cloc" id="certLocal"></div></div>
+  <div class="cb"><div class="cl">My first promise</div><div class="cpro" id="certPromise"></div></div>
+  <div class="cfoot"><span id="certDate"></span> · Find Your North Star · HB1000</div>
+</div></div>
 
 <script>
 (function(){
@@ -313,6 +369,47 @@
   $('ifBack').onclick=function(){renderEdit();};
   $('finish').onclick=function(){renderDone();};
   $('restart').onclick=function(){st={i:0,ans:{},scores:{},arch:null,verb:null,vrank:{},rewrite:''};$('rewrite').value='';$('ifTrigger').value='';$('ifAction').value='';show('s-intro');};
+
+  // ---- Keep it: certificate / email / copy + welcome-back ----
+  function curStar(){return {
+    name:($('certName')?$('certName').value.trim():''),
+    prime:$('fprime').textContent||'',local:$('flocal').textContent||'',promise:$('fpromise').textContent||''};}
+  function saveName(n){try{var o=JSON.parse(localStorage.getItem('ubp-northstar')||'{}');o.name=n;localStorage.setItem('ubp-northstar',JSON.stringify(o));}catch(e){}}
+  function pad(n){return n<10?'0'+n:''+n;}
+  function fmtDate(){var d=new Date();var M=['January','February','March','April','May','June','July','August','September','October','November','December'];return M[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();}
+  function fillCert(s){
+    $('certNameOut').textContent=s.name?('— '+s.name+' —'):'';
+    $('certPrime').textContent=s.prime;$('certLocal').textContent=s.local;$('certPromise').textContent=s.promise;
+    $('certDate').textContent=fmtDate();
+  }
+  if($('btnCert'))$('btnCert').onclick=function(){var s=curStar();fillCert(s);saveName(s.name);window.print();};
+  if($('btnEmail'))$('btnEmail').onclick=function(){
+    var s=curStar();saveName(s.name);
+    var body='My North Star\n\n★ My big-picture North Star:\n'+s.prime+'\n\n◆ My right-now North Star:\n'+s.local+'\n\n↻ My first promise:\n'+s.promise+'\n\nCome back to it here:\n'+location.href.split('#')[0];
+    window.location.href='mailto:?subject='+encodeURIComponent('My North Star')+'&body='+encodeURIComponent(body);
+  };
+  if($('btnCopy'))$('btnCopy').onclick=function(){
+    var s=curStar();var t='★ '+s.prime+'\n\n◆ '+s.local+'\n\n↻ '+s.promise;
+    function ok(){$('keepMsg').textContent='Copied ✓ — paste it anywhere to keep it.';}
+    function fb(){try{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}catch(e){}}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,function(){fb();ok();});}else{fb();ok();}
+  };
+
+  // Welcome-back: if a saved North Star exists on this device, greet the user with it
+  (function(){
+    var saved=null;try{saved=JSON.parse(localStorage.getItem('ubp-northstar')||'null');}catch(e){}
+    if(saved&&saved.prime){
+      $('s-intro').classList.add('hidden');
+      $('welcome').classList.remove('hidden');
+      $('welcomePrime').textContent='★ '+saved.prime;
+      $('viewSaved').onclick=function(){
+        $('fprime').textContent=saved.prime;$('flocal').textContent=saved.local||'';$('fpromise').textContent=saved.promise||'';
+        if(saved.name&&$('certName'))$('certName').value=saved.name;
+        $('welcome').classList.add('hidden');show('s-done');
+      };
+      $('newOne').onclick=function(){$('welcome').classList.add('hidden');$('s-intro').classList.remove('hidden');};
+    }
+  })();
 })();
 </script>
 <script src="assets/living-wallpaper.js?v=2"></script>
