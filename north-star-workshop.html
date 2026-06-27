@@ -69,6 +69,21 @@
   .card .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
   .err{color:var(--red,#e0556b);font-size:12.5px;min-height:16px}
   @media (max-width:560px){ h1.t{font-size:23px} }
+  /* ---------- living star + keep box (the "born" panel) ---------- */
+  .living{margin:16px 0;padding:16px;border:1px solid var(--gold);border-radius:14px;background:radial-gradient(120% 120% at 50% 0%,rgba(232,181,77,.14),#0c0a04)}
+  .living .ls-top{display:flex;align-items:center;gap:12px}
+  .living .ls-star{font-size:30px;line-height:1;animation:lsglow 3s ease-in-out infinite}
+  @keyframes lsglow{0%,100%{text-shadow:0 0 8px rgba(232,181,77,.45)}50%{text-shadow:0 0 18px rgba(232,181,77,.9)}}
+  .living .ls-day{display:block;font-size:17px;font-weight:800;color:var(--gold)}
+  .living .ls-sub{display:block;font-size:12px;color:var(--soft);margin-top:1px}
+  .living .ls-step{margin-top:12px;font-size:14px;color:var(--ink)}
+  .living .ls-step b{color:var(--gold)}
+  .living .ls-btn{margin-top:12px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;color:#1a1206;background:linear-gradient(135deg,#f7d68c,var(--gold) 60%,#a5762a);border:none;border-radius:999px;padding:10px 18px}
+  .living .ls-btn.done{background:none;color:var(--teal);border:1px solid var(--teal)}
+  .keepbox{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+  .keep-h{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:800}
+  .ppname{width:100%;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;margin:10px 0}
+  .keep-row{display:flex;gap:10px;flex-wrap:wrap}
   /* ---------- print ---------- */
   #printArea{display:none}
   @media print{
@@ -258,8 +273,72 @@
   function go(i){ if(i<0||i>=TOTAL||i===stepIndex) { if(i<0||i>=TOTAL) return; } stepIndex=Math.max(0,Math.min(TOTAL-1,i)); render(); scheduleSave(); }
 
   /* ---------- nav ---------- */
-  document.getElementById('next').addEventListener('click', function(){ if(stepIndex<TOTAL-1) go(stepIndex+1); });
+  document.getElementById('next').addEventListener('click', function(){ if(stepIndex<TOTAL-1) go(stepIndex+1); else finishWorkshop(); });
   document.getElementById('prev').addEventListener('click', function(){ if(stepIndex>0) go(stepIndex-1); });
+
+  /* ---------- finish: the "born" panel (living star + certificate) ---------- */
+  var K_DONE='ns-workshop-done';
+  function loadDone(){ try{ return JSON.parse(localStorage.getItem(K_DONE)||'{}')||{}; }catch(e){ return {}; } }
+  function saveDone(r){ try{ localStorage.setItem(K_DONE, JSON.stringify(r)); }catch(e){} }
+  function nsYmd(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function nsStatement(){ return (answers['refined_statement']||answers['draft_statement']||'').trim(); }
+  function livingHTML(rec){
+    var day=Math.floor((Date.now()-(rec.at||Date.now()))/86400000)+1;
+    var checks=rec.checkins||[], tended=checks.indexOf(nsYmd())>=0;
+    return '<div class="living"><div class="ls-top"><span class="ls-star">&#9733;</span><span>'+
+      '<span class="ls-day">Day '+day+' of your North Star</span>'+
+      '<span class="ls-sub">'+(checks.length?('Tended '+checks.length+' '+(checks.length===1?'day':'days')+' &middot; still glowing'):'Your star is lit &mdash; keep it glowing.')+'</span></span></div>'+
+      '<div class="ls-step"><b>Today:</b> do one small thing toward it.</div>'+
+      '<button class="ls-btn'+(tended?' done':'')+'" id="lsTend">'+(tended?'✓ Tended today':'✓ I did one thing today')+'</button></div>';
+  }
+  function wireLiving(){
+    var b=document.getElementById('lsTend'); if(!b) return;
+    b.addEventListener('click', function(){
+      var r=loadDone(); r.checkins=r.checkins||[]; var t=nsYmd();
+      if(r.checkins.indexOf(t)<0){ r.checkins.push(t); r.checkins=r.checkins.slice(-180); saveDone(r); }
+      var hold=document.getElementById('livingHolder'); if(hold){ hold.innerHTML=livingHTML(r); wireLiving(); }
+    });
+  }
+  function buildCertificate(name, statement){
+    var d=new Date(), M=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('printArea').innerHTML=
+      '<div style="max-width:720px;margin:0 auto;border:3px solid #c69a3a;border-radius:16px;padding:46px;text-align:center;font-family:Georgia,serif;color:#1a1a1a;background:#fffdf7">'+
+        '<div style="font-size:44px;color:#c69a3a;line-height:1">&#9733;</div>'+
+        '<div style="letter-spacing:.22em;font-size:13px;font-weight:bold;color:#9a7320;margin:10px 0 4px">MY NORTH STAR</div>'+
+        (name?'<div style="font-size:20px;font-style:italic;color:#333;margin:8px 0 22px">&mdash; '+esc(name)+' &mdash;</div>':'<div style="margin:12px 0"></div>')+
+        '<div style="font-size:20px;line-height:1.55;margin:14px 0">&ldquo;'+esc(statement)+'&rdquo;</div>'+
+        '<div style="margin-top:30px;font-size:12px;color:#888;border-top:1px solid #e3d8b8;padding-top:12px;letter-spacing:.04em">'+M[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear()+' &middot; Find Your North Star &middot; HB1000</div>'+
+      '</div>';
+  }
+  function finishWorkshop(){
+    var rec=loadDone(); rec.statement=nsStatement(); if(!rec.at) rec.at=Date.now(); rec.checkins=rec.checkins||[]; saveDone(rec);
+    renderDonePanel(rec);
+  }
+  function renderDonePanel(rec){
+    var s=rec.statement||'';
+    var h='<div class="sec" style="color:var(--violet)">&#9733; Your North Star is born</div>'+
+      '<img class="secimg" src="assets/img/ns-celebration-stars.webp" alt="A sky full of stars">'+
+      (s?'<div class="star-final">&ldquo;'+esc(s)+'&rdquo;</div>':'<div class="done-msg">Add your statement on the previous step, then finish again.</div>')+
+      '<div class="done-msg">Share it. Live it. Refine it. Return to it.</div>'+
+      '<div id="livingHolder">'+livingHTML(rec)+'</div>'+
+      '<div class="keepbox"><div class="keep-h">Keep your North Star &mdash; it’s yours</div>'+
+        '<input class="ppname" id="certName" placeholder="Your name (for the certificate)" autocomplete="name">'+
+        '<div class="keep-row">'+
+          '<button class="btn gold" id="certBtn">Save my certificate (PDF)</button>'+
+          '<button class="btn" id="emailBtn">Email it to me</button>'+
+          '<button class="btn" id="copyBtn">Copy</button>'+
+        '</div><div class="saved" id="keepMsg" style="opacity:1">Tip: bookmark this page &mdash; it remembers your North Star.</div></div>'+
+      '<div style="text-align:center;margin-top:14px"><button class="tlink" id="backToSteps">&larr; Back to my answers</button></div>';
+    document.getElementById('step').innerHTML=h;
+    var nav=document.querySelector('.nav'); if(nav) nav.style.display='none';
+    wireLiving();
+    var nameEl=document.getElementById('certName'); if(rec.name&&nameEl) nameEl.value=rec.name;
+    document.getElementById('certBtn').addEventListener('click', function(){ var nm=nameEl?nameEl.value.trim():''; rec.name=nm; saveDone(rec); buildCertificate(nm,s); window.print(); });
+    document.getElementById('emailBtn').addEventListener('click', function(){ var body='My North Star\n\n★ '+s+'\n\nFound with the HB1000 North Star Workshop.\nCome back to it: '+location.href.split('#')[0]; window.location.href='mailto:?subject='+encodeURIComponent('My North Star')+'&body='+encodeURIComponent(body); });
+    document.getElementById('copyBtn').addEventListener('click', function(){ var t='★ My North Star:\n'+s; var m=document.getElementById('keepMsg'); function ok(){ if(m) m.textContent='Copied ✓ — paste it anywhere.'; } if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(ok,ok); } else { ok(); } });
+    document.getElementById('backToSteps').addEventListener('click', function(){ var n=document.querySelector('.nav'); if(n) n.style.display=''; render(); });
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
 
   /* ---------- print ---------- */
   function buildPrint(blank){
@@ -308,6 +387,9 @@
     var savedStep=parseInt(localStorage.getItem(K_STEP)||'0',10);
     stepIndex = isNaN(savedStep)?0:Math.max(0,Math.min(TOTAL-1,savedStep));
     render(); starfield();
+    // already finished and parked at the end? greet them with their living star
+    var done=loadDone();
+    if(done && done.statement && stepIndex===TOTAL-1){ renderDonePanel(done); }
   }
   document.getElementById('beginBtn').addEventListener('click', async function(){
     var p1=document.getElementById('pp1').value, p2=document.getElementById('pp2').value, err=document.getElementById('ppErr');
