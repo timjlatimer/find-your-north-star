@@ -64,6 +64,18 @@
   .keep{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
   .hidden{display:none}
 
+  /* the living North Star — a small, alive companion on return (no surveillance, no clock) */
+  .living{margin-top:14px;padding:16px;border:1px solid var(--gold);border-radius:14px;background:radial-gradient(120% 120% at 50% 0%,rgba(232,181,77,.14),#0c0a04)}
+  .living .ls-top{display:flex;align-items:center;gap:12px}
+  .living .ls-star{font-size:30px;line-height:1;animation:lsglow 3s ease-in-out infinite}
+  @keyframes lsglow{0%,100%{text-shadow:0 0 8px rgba(232,181,77,.45)}50%{text-shadow:0 0 18px rgba(232,181,77,.9)}}
+  .living .ls-day{display:block;font-size:17px;font-weight:800;color:var(--gold)}
+  .living .ls-sub{display:block;font-size:12px;color:var(--soft);margin-top:1px}
+  .living .ls-step{margin-top:12px;font-size:14px;color:var(--ink);line-height:1.5}
+  .living .ls-step b{color:var(--gold)}
+  .living .ls-btn{margin-top:12px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;color:#1a1206;background:linear-gradient(135deg,#f7d68c,var(--gold) 60%,#a5762a);border:none;border-radius:999px;padding:10px 18px}
+  .living .ls-btn.done{background:none;color:var(--teal);border:1px solid var(--teal)}
+
   /* keepsake certificate — only appears when you print / save as PDF */
   @media screen{ #cert{display:none} }
   @media print{
@@ -92,6 +104,7 @@
   <div id="welcome" class="card hidden" style="border-color:var(--gold);background:#120c02">
     <div class="step" style="color:var(--gold)">★ Welcome back — your North Star is saved on this device</div>
     <p class="dtext" id="welcomePrime" style="margin-top:8px"></p>
+    <div class="living" id="livingBox"></div>
     <div class="row2" style="margin-top:8px">
       <button class="btn" id="viewSaved">View &amp; keep my North Star →</button>
       <button class="btn ghost" id="newOne">Start a new one</button>
@@ -402,6 +415,28 @@
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,function(){fb();ok();});}else{fb();ok();}
   };
 
+  // ---- the living North Star: a small, alive companion on return ----
+  function nsYmd(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function renderLiving(saved){
+    var box=$('livingBox'); if(!box||!saved||!saved.prime) return;
+    var day=Math.floor((Date.now()-(saved.at||Date.now()))/86400000)+1;
+    var checks=saved.checkins||[]; var tendedToday=checks.indexOf(nsYmd())>=0;
+    box.innerHTML=
+      '<div class="ls-top"><span class="ls-star">★</span><span>'+
+        '<span class="ls-day">Day '+day+' of your North Star</span>'+
+        '<span class="ls-sub">'+(checks.length?('Tended '+checks.length+' '+(checks.length===1?'day':'days')+' · still glowing'):'Your star is lit — keep it glowing.')+'</span>'+
+      '</span></div>'+
+      '<div class="ls-step"><b>Today:</b> <span id="lsStep"></span></div>'+
+      '<button class="ls-btn'+(tendedToday?' done':'')+'" id="lsTend">'+(tendedToday?'✓ Tended today':'✓ I did one thing today')+'</button>';
+    $('lsStep').textContent = saved.promise || 'Do one small thing toward your North Star today.';
+    $('lsTend').onclick=function(){
+      var s; try{s=JSON.parse(localStorage.getItem('ubp-northstar')||'{}');}catch(e){s={};}
+      s.checkins=s.checkins||[]; var t=nsYmd();
+      if(s.checkins.indexOf(t)<0){ s.checkins.push(t); s.checkins=s.checkins.slice(-180); try{localStorage.setItem('ubp-northstar',JSON.stringify(s));}catch(e){} }
+      renderLiving(s);
+    };
+  }
+
   // Welcome-back: if a saved North Star exists on this device, greet the user with it
   (function(){
     var saved=null;try{saved=JSON.parse(localStorage.getItem('ubp-northstar')||'null');}catch(e){}
@@ -409,6 +444,7 @@
       $('s-intro').classList.add('hidden');
       $('welcome').classList.remove('hidden');
       $('welcomePrime').textContent='★ '+saved.prime;
+      renderLiving(saved);
       $('viewSaved').onclick=function(){
         $('fprime').textContent=saved.prime;$('flocal').textContent=saved.local||'';$('fpromise').textContent=saved.promise||'';
         if(saved.name&&$('certName'))$('certName').value=saved.name;
