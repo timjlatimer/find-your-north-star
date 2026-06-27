@@ -151,6 +151,7 @@
 <div id="printArea"></div>
 
 <script src="assets/north-star-steps.js"></script>
+<script src="assets/north-star-cert.js"></script>
 <script>
 (function(){
   'use strict';
@@ -321,19 +322,32 @@
       (s?'<div class="star-final">&ldquo;'+esc(s)+'&rdquo;</div>':'<div class="done-msg">Add your statement on the previous step, then finish again.</div>')+
       '<div class="done-msg">Share it. Live it. Refine it. Return to it.</div>'+
       '<div id="livingHolder">'+livingHTML(rec)+'</div>'+
-      '<div class="keepbox"><div class="keep-h">Keep your North Star &mdash; it’s yours</div>'+
-        '<input class="ppname" id="certName" placeholder="Your name (for the certificate)" autocomplete="name">'+
+      '<div class="keepbox"><div class="keep-h">Your North Star page &mdash; yours to keep</div>'+
         '<div class="keep-row">'+
-          '<button class="btn gold" id="certBtn">Save my certificate (PDF)</button>'+
-          '<button class="btn" id="emailBtn">Email it to me</button>'+
-          '<button class="btn" id="copyBtn">Copy</button>'+
-        '</div><div class="saved" id="keepMsg" style="opacity:1">Tip: bookmark this page &mdash; it remembers your North Star.</div></div>'+
+          '<button class="btn gold" id="nsOpenCert">&#9733; Open my North Star page</button>'+
+          '<button class="btn" id="nsSaveCert">Save it to my device</button>'+
+        '</div>'+
+        '<div class="keep-row" style="margin-top:8px">'+
+          '<button class="btn" id="emailBtn">Email it</button>'+
+          '<button class="btn" id="copyBtn">Copy the words</button>'+
+        '</div>'+
+        '<div class="saved" id="keepMsg" style="opacity:1;color:var(--soft)">A real web page with all your words &mdash; opens anywhere, even offline. It stays on your device; we never see it.</div></div>'+
       '<div style="text-align:center;margin-top:14px"><button class="tlink" id="backToSteps">&larr; Back to my answers</button></div>';
     document.getElementById('step').innerHTML=h;
     var nav=document.querySelector('.nav'); if(nav) nav.style.display='none';
     wireLiving();
-    var nameEl=document.getElementById('certName'); if(rec.name&&nameEl) nameEl.value=rec.name;
-    document.getElementById('certBtn').addEventListener('click', function(){ var nm=nameEl?nameEl.value.trim():''; rec.name=nm; saveDone(rec); buildCertificate(nm,s); window.print(); });
+    var oc=document.getElementById('nsOpenCert');
+    if(oc) oc.addEventListener('click', function(){
+      if(typeof openNorthStarPage!=='function'){ alert('Your page is still loading — give it a second and try again.'); return; }
+      var orig=oc.textContent; oc.disabled=true; oc.textContent='Opening…';
+      openNorthStarPage(answers).catch(function(){ alert('Could not open it — try “Save it to my device” instead.'); }).then(function(){ oc.disabled=false; oc.textContent=orig; });
+    });
+    var sc=document.getElementById('nsSaveCert');
+    if(sc) sc.addEventListener('click', function(){
+      if(typeof saveNorthStarPage!=='function'){ alert('Your page is still loading — give it a second and try again.'); return; }
+      sc.disabled=true;
+      saveNorthStarPage(answers).then(function(){ var m=document.getElementById('keepMsg'); if(m) m.textContent='Saved. Find it in your Downloads — open it any time, even offline.'; }).catch(function(){ alert('Could not save automatically. Use “Open my North Star page”, then that page’s own Save button.'); }).then(function(){ sc.disabled=false; });
+    });
     document.getElementById('emailBtn').addEventListener('click', function(){ var body='My North Star\n\n★ '+s+'\n\nFound with the HB1000 North Star Workshop.\nCome back to it: '+location.href.split('#')[0]; window.location.href='mailto:?subject='+encodeURIComponent('My North Star')+'&body='+encodeURIComponent(body); });
     document.getElementById('copyBtn').addEventListener('click', function(){ var t='★ My North Star:\n'+s; var m=document.getElementById('keepMsg'); function ok(){ if(m) m.textContent='Copied ✓ — paste it anywhere.'; } if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(ok,ok); } else { ok(); } });
     document.getElementById('backToSteps').addEventListener('click', function(){ var n=document.querySelector('.nav'); if(n) n.style.display=''; render(); });
