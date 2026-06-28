@@ -187,11 +187,15 @@
     <div class="keep">
       <div class="step" style="color:var(--teal)">Keep your North Star — it's yours</div>
       <p class="hint" style="margin-top:6px">It's already saved on this device. To keep a copy you'll <b>always</b> have, do one of these:</p>
-      <p class="label" style="margin-top:14px">Your name (for your certificate)</p>
+      <p class="label" style="margin-top:14px">Your name (for your page)</p>
       <input class="field" id="certName" placeholder="e.g., Tim Latimer" autocomplete="name">
       <div class="row2" style="margin-top:12px">
-        <button class="btn" id="btnCert">📄 Save my certificate (PDF)</button>
-        <button class="btn ghost" id="btnEmail">✉️ Email it to me</button>
+        <button class="btn" id="btnOpenPage">★ Open my North Star page</button>
+        <button class="btn ghost" id="btnSavePage">Save it to my device</button>
+      </div>
+      <div class="row2" style="margin-top:8px">
+        <button class="btn ghost" id="btnCert">📄 Print / PDF</button>
+        <button class="btn ghost" id="btnEmail">✉️ Email</button>
         <button class="btn ghost" id="btnCopy">📋 Copy</button>
       </div>
       <p class="hint" id="keepMsg" style="margin-top:10px">📌 Tip: bookmark this page. Come back anytime and it remembers your North Star.</p>
@@ -219,6 +223,7 @@
   <div class="cfoot"><span id="certDate"></span> · Find Your North Star · HB1000</div>
 </div></div>
 
+<script src="assets/north-star-cert.js"></script>
 <script>
 (function(){
   var A = {
@@ -413,6 +418,28 @@
     function ok(){$('keepMsg').textContent='Copied ✓ — paste it anywhere to keep it.';}
     function fb(){try{var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}catch(e){}}
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,function(){fb();ok();});}else{fb();ok();}
+  };
+  // ---- the beautiful keepsake web page (shared generator, quick-path data shape) ----
+  function v2opts(){
+    var s=curStar(); var val='';
+    try{ val=(JSON.parse(localStorage.getItem('ubp-northstar')||'{}').value)||''; }catch(e){}
+    return { name:s.name, statement:s.prime, journey:[
+      { label:'My right-now North Star', words:s.local },
+      { label:'My first promise', words:s.promise },
+      { label:'The value I lead with', words:val }
+    ]};
+  }
+  if($('btnOpenPage'))$('btnOpenPage').onclick=function(){
+    var s=curStar(); saveName(s.name);
+    if(typeof openNorthStarPage!=='function'){ alert('Your page is still loading — give it a second and try again.'); return; }
+    var b=$('btnOpenPage'); var orig=b.textContent; b.disabled=true; b.textContent='Opening…';
+    openNorthStarPage(null, v2opts()).catch(function(){ alert('Could not open it — try “Save it to my device” instead.'); }).then(function(){ b.disabled=false; b.textContent=orig; });
+  };
+  if($('btnSavePage'))$('btnSavePage').onclick=function(){
+    var s=curStar(); saveName(s.name);
+    if(typeof saveNorthStarPage!=='function'){ alert('Your page is still loading — give it a second and try again.'); return; }
+    var b=$('btnSavePage'); b.disabled=true;
+    saveNorthStarPage(null, v2opts()).then(function(){ $('keepMsg').textContent='Saved. Find it in your Downloads — open it any time, even offline.'; }).catch(function(){ alert('Could not save automatically. Use “Open my North Star page”, then that page’s own Save button.'); }).then(function(){ b.disabled=false; });
   };
 
   // ---- the living North Star: a small, alive companion on return ----

@@ -108,6 +108,27 @@ window.NS_CERT_TEMPLATE = "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta ch
     return out.join('\n');
   }
 
+  /* ---- build journey HTML from an explicit list (for callers with their own
+         data shape, e.g. the 8-minute quick path): [{label, words, subLabel, subWords}] ---- */
+  function buildJourneyFromList(list){
+    var out = [];
+    (list || []).forEach(function(item){
+      if(!item || !nonBlank(item.words)) return;
+      if(nonBlank(item.subWords)){
+        out.push(ENTRY_PAIRED_TPL
+          .replace('{{LABEL}}', escHtml(item.label||''))
+          .replace('{{WORDS}}', escMultiline(item.words))
+          .replace('{{SUB_LABEL}}', escHtml(item.subLabel||''))
+          .replace('{{SUB_WORDS}}', escMultiline(item.subWords)));
+      } else {
+        out.push(ENTRY_TPL
+          .replace('{{LABEL}}', escHtml(item.label||''))
+          .replace('{{WORDS}}', escMultiline(item.words)));
+      }
+    });
+    return out.join('\n');
+  }
+
   /* ---- resolve hero: try base64 (offline-gorgeous), fall back to hosted URL ---- */
   function fetchAsDataURI(url){
     return fetch(url, { cache:'force-cache' })
@@ -136,13 +157,21 @@ window.NS_CERT_TEMPLATE = "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta ch
     return tpl.split(token).join(value);
   }
 
-  function buildNorthStarPage(answers){
+  function buildNorthStarPage(answers, opts){
     answers = answers || {};
-    var name      = nonBlank(answers.your_name) ? String(answers.your_name).trim() : 'Friend';
-    var statement = answers.refined_statement || answers.draft_statement || '';
+    var name, statement, journey;
+    if(opts && (opts.statement || opts.journey)){
+      // explicit override (8-minute quick path supplies its own shape)
+      name      = nonBlank(opts.name) ? String(opts.name).trim() : 'Friend';
+      statement = opts.statement || '';
+      journey   = buildJourneyFromList(opts.journey);
+    } else {
+      name      = nonBlank(answers.your_name) ? String(answers.your_name).trim() : 'Friend';
+      statement = answers.refined_statement || answers.draft_statement || '';
+      journey   = buildJourney(answers);
+    }
     var date      = getNiceDate();
     var year      = String(new Date().getFullYear());
-    var journey   = buildJourney(answers);
 
     if(!TEMPLATE){
       return Promise.reject(new Error('NS_CERT_TEMPLATE is not set. Assign the keepsake HTML to window.NS_CERT_TEMPLATE.'));
@@ -162,8 +191,8 @@ window.NS_CERT_TEMPLATE = "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta ch
   }
 
   /* ---- open in a new tab via Blob URL (with same-tab fallback) ---- */
-  function openNorthStarPage(answers){
-    return buildNorthStarPage(answers).then(function(html){
+  function openNorthStarPage(answers, opts){
+    return buildNorthStarPage(answers, opts).then(function(html){
       var blob = new Blob([html], { type:'text/html;charset=utf-8' });
       var url  = URL.createObjectURL(blob);
       var w = window.open(url, '_blank');
@@ -177,10 +206,10 @@ window.NS_CERT_TEMPLATE = "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta ch
   }
 
   /* ---- download as a self-contained file ---- */
-  function saveNorthStarPage(answers){
-    return buildNorthStarPage(answers).then(function(html){
-      var name = (answers && answers.your_name ? String(answers.your_name) : 'My-North-Star')
-                   .replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'') || 'My-North-Star';
+  function saveNorthStarPage(answers, opts){
+    return buildNorthStarPage(answers, opts).then(function(html){
+      var who = (opts && opts.name) ? String(opts.name) : (answers && answers.your_name ? String(answers.your_name) : 'My-North-Star');
+      var name = who.replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'') || 'My-North-Star';
       var blob = new Blob([html], { type:'text/html;charset=utf-8' });
       var url  = URL.createObjectURL(blob);
       var a = document.createElement('a');
