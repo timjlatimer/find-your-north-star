@@ -1,0 +1,36 @@
+# Environment variables — NEVER commit secrets
+.env
+.env.local
+.env.production
+*.env
+
+# API keys and secrets
+*.key
+*.pem
+secrets/
+credentials/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build outputs (if any)
+dist/
+build/
+out/
+
+# Node (if npm is used for tooling)
+node_modules/
+.pnpm-store/
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
